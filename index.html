@@ -1154,9 +1154,7 @@ function sincMeta2() {
   renderKPIs();
 }
 
-// Usa hora local — evita bug de fuso horário no mobile (toISOString usa UTC)
-function getHoje(){const n=new Date();return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;}
-const hoje=getHoje();
+const hoje=(()=>{const n=new Date();return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;})();
 const elData=document.getElementById('f-data');if(elData)elData.value=hoje;
 const elDate=document.getElementById('headerDate');if(elDate)elDate.textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'}).toUpperCase();
 if(metas.mensal){const m1=document.getElementById('meta-mensal');const m2=document.getElementById('meta-mensal2');if(m1)m1.value=metas.mensal;if(m2)m2.value=metas.mensal;}
@@ -1449,13 +1447,11 @@ function fazerLogin(e) {
   const senhaSalva = localStorage.getItem('x1_senha_local') || 'admin1234';
   
   if (email === emailSalvo && senha === senhaSalva) {
-    localStorage.setItem('x1_logado', 'true');
+    sessionStorage.setItem('x1_logado', 'true');
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-container').style.display = 'block';
     document.getElementById('login-usuario').value = '';
     document.getElementById('login-senha').value = '';
-    initApp();
-    atualizarSaudacao();
   } else {
     msg.textContent = 'Email ou senha incorretos';
   }
@@ -1463,7 +1459,7 @@ function fazerLogin(e) {
 
 function fazerLogout() {
   if (!confirm('Sair da conta?')) return;
-  localStorage.removeItem('x1_logado');
+  sessionStorage.removeItem('x1_logado');
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('app-container').style.display = 'none';
   document.getElementById('login-usuario').value = '';
@@ -2156,9 +2152,9 @@ function aplicarFormMode(){
 function abrirQuickForm(){
   const overlay = document.getElementById('quick-overlay');
   if(!overlay) return;
-  // preencher data de hoje (local, não UTC)
-  const _hj = new Date();
-  const iso = `${_hj.getFullYear()}-${String(_hj.getMonth()+1).padStart(2,'0')}-${String(_hj.getDate()).padStart(2,'0')}`;
+  // preencher data de hoje
+  const hoje = new Date();
+  const iso = hoje.toISOString().split('T')[0];
   document.getElementById('qf-data').value = iso;
   document.getElementById('qf-iof').value = '4.38';
   // popular ofertas
@@ -2214,11 +2210,7 @@ async function salvarQuickRegistro(){
 
 /* ── HOJE HERO CARD ── */
 function atualizarHojeHero(){
-  // Sempre recalcula a data local para evitar bugs de fuso no mobile
-  const _n = new Date();
-  const hojeLocal = `${_n.getFullYear()}-${String(_n.getMonth()+1).padStart(2,'0')}-${String(_n.getDate()).padStart(2,'0')}`;
-
-  const regsHoje = dados.filter(d => d.data === hojeLocal);
+  const regsHoje = dados.filter(d => d.data === hoje);
   const lucroHoje = regsHoje.reduce((s,d) => s + (d.lucro||0), 0);
   const heroValor = document.getElementById('hoje-hero-valor');
   const heroSub = document.getElementById('hoje-hero-sub');
@@ -2228,35 +2220,19 @@ function atualizarHojeHero(){
   heroValor.textContent = fmtBRL(lucroHoje);
   heroValor.className = 'hoje-hero-valor ' + (lucroHoje > 0 ? 'pos' : lucroHoje < 0 ? 'neg' : 'zero');
   if(heroSub) heroSub.textContent = regsHoje.length > 0 ? `${regsHoje.length} registro${regsHoje.length>1?'s':''} hoje` : 'Nenhum registro hoje ainda';
-
-  // Meta diária: prefer metas.diaria explícita, senão divide mensal pelos dias do mês
+  // meta diária — buscar de todas as fontes possíveis
   const metaMensal = (metas&&(metas.mensal||metas.lucroMensal)) ||
     parseFloat(document.getElementById('meta-mensal')?.value||'0') || 0;
-  const metaDiariaExplicita = metas&&metas.diaria ? metas.diaria : 0;
-  const diasMes = new Date(_n.getFullYear(), _n.getMonth()+1, 0).getDate();
-  const metaDia = metaDiariaExplicita > 0 ? metaDiariaExplicita : (metaMensal > 0 ? metaMensal / diasMes : 0);
-
-  if(metaDia > 0 && metaDash && metaPct){
+  if(metaMensal > 0 && metaDash && metaPct){
+    const diasMes = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
+    const metaDia = metaMensal / diasMes;
+    const pct = Math.max(0, Math.min(lucroHoje / metaDia, 1));
     const circ = 150.8;
-    const rawPct = lucroHoje / metaDia; // pode ser negativo ou > 1
-    if(lucroHoje < 0){
-      // Dia negativo: anel vermelho, porcentagem negativa
-      metaDash.style.stroke = 'var(--red)';
-      metaDash.style.strokeDashoffset = circ;
-      metaPct.textContent = Math.round(rawPct * 100) + '%';
-      metaPct.style.color = 'var(--red)';
-    } else {
-      // Dia positivo: acima de 100% é permitido
-      const pctDisplay = Math.round(rawPct * 100);
-      const pctFill = Math.min(rawPct, 1); // anel fica cheio em 100%
-      metaDash.style.stroke = rawPct >= 1 ? 'var(--green)' : 'var(--yellow,#eab308)';
-      metaDash.style.strokeDashoffset = circ * (1 - pctFill);
-      metaPct.textContent = pctDisplay + '%';
-      metaPct.style.color = rawPct >= 1 ? 'var(--green)' : 'var(--yellow,#eab308)';
-    }
+    metaDash.style.stroke = lucroHoje >= metaDia ? 'var(--green)' : lucroHoje > 0 ? 'var(--yellow,#eab308)' : 'var(--border2)';
+    metaDash.style.strokeDashoffset = circ * (1 - pct);
+    metaPct.textContent = Math.round(pct*100) + '%';
   } else if(metaPct) {
-    metaPct.textContent = metaDia > 0 ? '0%' : '—';
-    metaPct.style.color = '';
+    metaPct.textContent = metaMensal > 0 ? '0%' : '—';
   }
 }
 
@@ -2536,7 +2512,7 @@ window.addEventListener('load', () => {
   document.getElementById('loading-screen').style.display = 'none';
   
   // Verificar se está logado
-  const logado = localStorage.getItem('x1_logado');
+  const logado = sessionStorage.getItem('x1_logado');
   if (logado === 'true') {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-container').style.display = 'block';
