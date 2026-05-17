@@ -1154,7 +1154,7 @@ function sincMeta2() {
   renderKPIs();
 }
 
-// Usa hora local — evita bug de fuso horário no mobile (iOS/Android)
+// Usa hora local — evita bug de fuso horário no mobile (toISOString usa UTC)
 function getHoje(){const n=new Date();return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;}
 const hoje=getHoje();
 const elData=document.getElementById('f-data');if(elData)elData.value=hoje;
@@ -1449,11 +1449,13 @@ function fazerLogin(e) {
   const senhaSalva = localStorage.getItem('x1_senha_local') || 'admin1234';
   
   if (email === emailSalvo && senha === senhaSalva) {
-    sessionStorage.setItem('x1_logado', 'true');
+    localStorage.setItem('x1_logado', 'true');
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-container').style.display = 'block';
     document.getElementById('login-usuario').value = '';
     document.getElementById('login-senha').value = '';
+    initApp();
+    atualizarSaudacao();
   } else {
     msg.textContent = 'Email ou senha incorretos';
   }
@@ -1461,7 +1463,7 @@ function fazerLogin(e) {
 
 function fazerLogout() {
   if (!confirm('Sair da conta?')) return;
-  sessionStorage.removeItem('x1_logado');
+  localStorage.removeItem('x1_logado');
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('app-container').style.display = 'none';
   document.getElementById('login-usuario').value = '';
@@ -2212,7 +2214,7 @@ async function salvarQuickRegistro(){
 
 /* ── HOJE HERO CARD ── */
 function atualizarHojeHero(){
-  // Data de hoje à prova de fuso horário (usa hora local, não UTC)
+  // Sempre recalcula a data local para evitar bugs de fuso no mobile
   const _n = new Date();
   const hojeLocal = `${_n.getFullYear()}-${String(_n.getMonth()+1).padStart(2,'0')}-${String(_n.getDate()).padStart(2,'0')}`;
 
@@ -2237,16 +2239,15 @@ function atualizarHojeHero(){
   if(metaDia > 0 && metaDash && metaPct){
     const circ = 150.8;
     const rawPct = lucroHoje / metaDia; // pode ser negativo ou > 1
-
     if(lucroHoje < 0){
       // Dia negativo: anel vermelho, porcentagem negativa
       metaDash.style.stroke = 'var(--red)';
-      metaDash.style.strokeDashoffset = circ; // anel vazio (sem preenchimento)
+      metaDash.style.strokeDashoffset = circ;
       metaPct.textContent = Math.round(rawPct * 100) + '%';
       metaPct.style.color = 'var(--red)';
     } else {
-      // Dia positivo: pode ir acima de 100%
-      const pctDisplay = Math.round(rawPct * 100); // sem teto
+      // Dia positivo: acima de 100% é permitido
+      const pctDisplay = Math.round(rawPct * 100);
       const pctFill = Math.min(rawPct, 1); // anel fica cheio em 100%
       metaDash.style.stroke = rawPct >= 1 ? 'var(--green)' : 'var(--yellow,#eab308)';
       metaDash.style.strokeDashoffset = circ * (1 - pctFill);
@@ -2535,7 +2536,7 @@ window.addEventListener('load', () => {
   document.getElementById('loading-screen').style.display = 'none';
   
   // Verificar se está logado
-  const logado = sessionStorage.getItem('x1_logado');
+  const logado = localStorage.getItem('x1_logado');
   if (logado === 'true') {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-container').style.display = 'block';
