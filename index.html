@@ -24,20 +24,18 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .app-header{
   position:sticky;top:0;z-index:100;
   background:var(--surface);border-bottom:1px solid var(--border);
-  padding:0 1.25rem;height:auto;min-height:52px;
-  display:flex;flex-direction:column;justify-content:center;
-  padding-top:var(--safe-top);
-  gap:.18rem;
+  padding:.35rem 1.25rem;padding-top:calc(.35rem + var(--safe-top));
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.2rem .5rem;
 }
-.header-revenue{display:flex;align-items:baseline;gap:.35rem;flex-wrap:wrap;}
-.header-rev-label{font-size:.6rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.04em;margin-right:.15rem;}
+.header-left{display:flex;align-items:baseline;gap:.35rem;flex-wrap:wrap;flex:1;min-width:0;}
+.header-rev-label{font-size:.6rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.04em;}
 .header-rev-value{font-size:.85rem;font-weight:700;color:var(--text);}
 .header-rev-sep{font-size:.7rem;color:var(--muted2);}
 .header-rev-target{font-size:.72rem;color:var(--muted);font-weight:500;}
-.header-rev-pct{font-size:.6rem;color:var(--accent);font-weight:600;margin-left:auto;}
-.header-rev-bar{height:3px;background:var(--border2);border-radius:2px;overflow:hidden;margin:2px 0 0;}
+.header-rev-pct{font-size:.6rem;color:var(--accent);font-weight:600;}
+.header-rev-bar{height:3px;background:var(--border2);border-radius:2px;overflow:hidden;flex:1 1 100%;margin:1px 0 0;}
 .header-rev-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .6s ease;}
-.header-right{display:flex;align-items:center;gap:.5rem;position:absolute;top:var(--safe-top,0);right:.75rem;}
+.header-right{display:flex;align-items:center;gap:.35rem;flex-shrink:0;}
 .header-date{font-size:.62rem;color:var(--muted);display:none;}
 .ai-btn{background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.3);color:#c084fc;border-radius:8px;padding:.32rem .7rem;font-size:.72rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.3rem;font-family:'Inter',sans-serif;}
 .ai-btn:hover{background:rgba(168,85,247,.25);}
@@ -295,7 +293,7 @@ tbody tr:last-child td{border-bottom:none;}
 .modal-close:hover{color:var(--text);background:rgba(255,255,255,.05);}
 .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.95rem;}
 .modal-actions{display:flex;gap:.5rem;}
-.confirm-modal{text-align:center;}
+.confirm-modal{text-align:center;position:relative;}
 .confirm-icon{font-size:2rem;margin-bottom:.55rem;}
 .confirm-msg{font-size:.88rem;font-weight:500;margin-bottom:.28rem;}
 .confirm-sub{font-size:.75rem;color:var(--muted);margin-bottom:.9rem;}
@@ -337,11 +335,10 @@ tbody tr:last-child td{border-bottom:none;}
   .app-content{flex:1;min-width:0;}
   .bottom-nav{display:none;}
   .desktop-tabs{display:block;}
-  .app-header{padding:0 2rem;min-height:52px;flex-direction:row;align-items:center;gap:.5rem;}
+  .app-header{padding:.45rem 2rem;gap:.35rem .75rem;}
   .app-header .logo{display:none;}
-  .header-right{position:static;}
-  .header-revenue{flex:1;}
-  .header-rev-bar{flex:none;width:120px;}
+  .header-left{flex:none;}
+  .header-rev-bar{flex:none;width:120px;margin:0;}
   .header-date{display:block;}
   .view{padding:1.5rem 2rem;}
   .kpi-strip{padding:1rem 2rem;}
@@ -553,27 +550,26 @@ body.light .mini-sel{color-scheme:light;}
 <!-- DESKTOP TABS (sidebar) -->
 <div class="desktop-tabs" id="desktop-tabs">
   <div class="dtab-logo">X1 <span>Dashboard</span></div>
-  <button class="dtab active" onclick="switchTab('resumo',this,0)">Resumo</button>
-  <button class="dtab" onclick="switchTab('registro',this,1)">Registrar</button>
-  <button class="dtab" onclick="switchTab('periodo',this,2)">Por Período</button>
-  <button class="dtab" onclick="switchTab('historico',this,3)">Histórico</button>
-  <button class="dtab" onclick="switchTab('graficos',this,4)">Gráficos</button>
-  <button class="dtab" onclick="switchTab('crescimento',this,5)">Crescimento</button>
-  <button class="dtab" onclick="switchTab('config',this,6)">Config</button>
+  <button class="dtab active" onclick="switchTab('resumo',this,0)" data-tab="resumo">Resumo</button>
+  <button class="dtab" onclick="switchTab('registro',this,1)" data-tab="registro">Registrar</button>
+  <button class="dtab" onclick="switchTab('periodo',this,2)" data-tab="periodo">Por Período</button>
+  <button class="dtab" onclick="switchTab('historico',this,3)" data-tab="historico">Histórico</button>
+  <button class="dtab" onclick="switchTab('graficos',this,4)" data-tab="graficos">Gráficos</button>
+  <button class="dtab" onclick="switchTab('crescimento',this,5)" data-tab="crescimento">Crescimento</button>
+  <button class="dtab" onclick="switchTab('config',this,6)" data-tab="config">Config</button>
 </div>
 
 <div class="app-content">
 
 <!-- HEADER: Revenue / Meta 1M -->
 <header class="app-header">
-  <div class="header-revenue">
+  <div class="header-left">
     <span class="header-rev-label">Faturamento</span>
     <span class="header-rev-value" id="header-rev-value">R$ 0,00</span>
     <span class="header-rev-sep">/</span>
     <span class="header-rev-target">R$ 1M</span>
     <span class="header-rev-pct" id="header-rev-pct">0%</span>
   </div>
-  <div class="header-rev-bar"><div class="header-rev-fill" id="header-rev-fill" style="width:0%"></div></div>
   <div class="header-right">
     <div class="header-date" id="headerDate"></div>
     <button class="theme-btn" onclick="toggleTema()" id="theme-btn" title="Alternar tema">🌙</button>
@@ -581,6 +577,7 @@ body.light .mini-sel{color-scheme:light;}
     <button class="logout-btn" onclick="switchTab('perfil',null,99)" style="color:var(--accent);font-size:.72rem;padding:.32rem .5rem">⚙</button>
     <button class="logout-btn" onclick="fazerLogout()" title="Sair" style="opacity:.5;font-size:.72rem">⏻</button>
   </div>
+  <div class="header-rev-bar"><div class="header-rev-fill" id="header-rev-fill" style="width:0%"></div></div>
 </header>
 
 <!-- VIEWS -->
@@ -1783,8 +1780,7 @@ function renderWeek(){
 }
 function filtrarDia(dia){
   document.getElementById('periodo-de').value=dia;document.getElementById('periodo-ate').value=dia;
-  const periodoBtns=document.querySelectorAll('[data-tab="periodo"],.dtab');
-  switchTab('periodo',document.querySelector('.dtab:nth-child(3)')||document.querySelector('[data-tab="periodo"]'),2);
+  switchTab('periodo',document.querySelector('.dtab[data-tab="periodo"]'),2);
   renderPeriodo();
 }
 
