@@ -25,9 +25,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
   position:sticky;top:0;z-index:100;
   background:var(--surface);border-bottom:1px solid var(--border);
   padding:.35rem 1.25rem;padding-top:calc(.35rem + var(--safe-top));
-  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.2rem .5rem;
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.15rem .5rem;
 }
-.header-left{display:flex;align-items:baseline;gap:.35rem;flex-wrap:wrap;flex:1;min-width:0;}
+.header-left{display:flex;align-items:baseline;gap:.35rem;flex-wrap:wrap;}
 .header-rev-label{font-size:.6rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.04em;}
 .header-rev-value{font-size:.85rem;font-weight:700;color:var(--text);}
 .header-rev-sep{font-size:.7rem;color:var(--muted2);}
@@ -60,6 +60,8 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .bnav-label{font-size:.58rem;font-weight:500;letter-spacing:.02em;pointer-events:none;}
 
 /* ── DESKTOP SIDEBAR (hidden on mobile) ── */
+#app-container{display:none;}
+#app-container.visible{display:block;}
 .desktop-tabs{display:none;width:220px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:.75rem 0;overflow-y:auto;min-height:100vh;}
 .dtab-logo{padding:.65rem 1.25rem .85rem;font-size:1.1rem;font-weight:700;letter-spacing:-.03em;border-bottom:1px solid var(--border);margin-bottom:.5rem;}
 .dtab-logo span{color:var(--accent);}
@@ -331,14 +333,12 @@ tbody tr:last-child td{border-bottom:none;}
 /* DESKTOP OVERRIDES */
 @media(min-width:768px){
   body{padding-bottom:0;}
-  #app-container{display:flex;}
+  #app-container.visible{display:flex;}
   .app-content{flex:1;min-width:0;}
   .bottom-nav{display:none;}
   .desktop-tabs{display:block;}
-  .app-header{padding:.45rem 2rem;gap:.35rem .75rem;}
+  .app-header{padding:.45rem 2rem;gap:.18rem .5rem;}
   .app-header .logo{display:none;}
-  .header-left{flex:none;}
-  .header-rev-bar{flex:none;width:120px;margin:0;}
   .header-date{display:block;}
   .view{padding:1.5rem 2rem;}
   .kpi-strip{padding:1rem 2rem;}
@@ -1441,7 +1441,7 @@ function fazerLogin(e) {
   if (email === emailSalvo && senha === senhaSalva) {
     sessionStorage.setItem('x1_logado', 'true');
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-container').style.display = 'block';
+    document.getElementById('app-container').classList.add('visible');
     document.getElementById('login-usuario').value = '';
     document.getElementById('login-senha').value = '';
   } else {
@@ -1453,7 +1453,7 @@ function fazerLogout() {
   if (!confirm('Sair da conta?')) return;
   sessionStorage.removeItem('x1_logado');
   document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app-container').style.display = 'none';
+  document.getElementById('app-container').classList.remove('visible');
   document.getElementById('login-usuario').value = '';
   document.getElementById('login-senha').value = '';
   document.getElementById('login-msg').textContent = '';
@@ -1461,13 +1461,13 @@ function fazerLogout() {
 
 function entrarSemSenha() {
   document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app-container').style.display = 'block';
+  document.getElementById('app-container').classList.add('visible');
 }
 
 function fazerLogout() {
   if (!confirm('Sair da conta?')) return;
   document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app-container').style.display = 'none';
+  document.getElementById('app-container').classList.remove('visible');
   document.getElementById('login-senha').value = '';
   document.getElementById('login-msg').textContent = '';
 }
@@ -1519,7 +1519,7 @@ function showSyncStatus(status) {
 
 function entrarNoDashboard() {
   document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app-container').style.display = 'block';
+  document.getElementById('app-container').classList.add('visible');
   atualizarSaudacao();
   atualizarSelects();
   renderAll();
@@ -2635,11 +2635,11 @@ window.addEventListener('load', () => {
   const logado = sessionStorage.getItem('x1_logado');
   if (logado === 'true') {
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-container').style.display = 'block';
+    document.getElementById('app-container').classList.add('visible');
     initApp();
   } else {
     document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('app-container').style.display = 'none';
+    document.getElementById('app-container').classList.remove('visible');
   }
 });
 </script>
