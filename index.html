@@ -8,6 +8,9 @@
 <title>X1 Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <style>
 :root{
   --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#252d3d;--border2:#2e3a50;
@@ -853,6 +856,25 @@ body.light .mini-sel{color-scheme:light;}
     <div class="ai-key-hint" id="ai-key-hint">Nenhuma chave salva.</div>
   </div>
 
+  <!-- SINCRONIZAÇÃO FIREBASE -->
+  <div class="form-card">
+    <div class="form-title">☁️ Sincronização na Nuvem</div>
+    <div class="aviso">Conecte ao Firebase para sincronizar seus dados entre dispositivos (celular ↔ computador). <a href="https://firebase.google.com/docs/web/setup" target="_blank" style="color:var(--accent)">Como configurar →</a></div>
+    <div id="firebase-status" style="font-size:.72rem;color:var(--muted);margin-bottom:.75rem;padding:.5rem;background:var(--surface2);border-radius:8px;">
+      Status: <span id="firebase-status-text">Não configurado</span>
+    </div>
+    <div class="form-grid">
+      <div class="field" style="grid-column:span 2"><label>API Key</label><input type="text" id="fb-apiKey" placeholder="AIzaSy..." style="font-family:monospace;font-size:.72rem"></div>
+      <div class="field" style="grid-column:span 2"><label>Auth Domain</label><input type="text" id="fb-authDomain" placeholder="seu-projeto.firebaseapp.com" style="font-size:.85rem"></div>
+      <div class="field" style="grid-column:span 2"><label>Project ID</label><input type="text" id="fb-projectId" placeholder="seu-projeto" style="font-size:.85rem"></div>
+      <div class="field" style="grid-column:span 2"><label>Database URL</label><input type="text" id="fb-databaseURL" placeholder="https://seu-projeto-default-rtdb.firebaseio.com" style="font-size:.85rem"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="salvarConfigFirebase()">☁️ Conectar</button>
+      <button class="btn btn-ghost" onclick="testarSyncFirebase()" id="btn-test-sync" style="display:none">⟳ Sincronizar agora</button>
+    </div>
+  </div>
+
   <!-- METAS -->
   <div class="form-card">
     <div class="form-title">Metas</div>
@@ -1111,6 +1133,219 @@ body.light .mini-sel{color-scheme:light;}
 <div class="toast" id="toast"></div>
 
 <script>
+// ========== FIREBASE SYNC ==========
+let firebaseConfig = null;
+let firebaseDb = null;
+let firebaseInitialized = false;
+let ultimaSincronizacao = null;
+
+// Carregar config do Firebase
+function carregarConfigFirebase(){
+  const configJson = localStorage.getItem('x1_firebase_config');
+  if(configJson){
+    try{
+      firebaseConfig = JSON.parse(configJson);
+      // Preencher campos na tela de config
+      const campos = ['fb-apiKey','fb-authDomain','fb-projectId','fb-databaseURL'];
+      campos.forEach(id => {
+        const el = document.getElementById(id);
+        if(el && firebaseConfig[id.replace('fb-','')]){
+          el.value = firebaseConfig[id.replace('fb-','')];
+        }
+      });
+      atualizarStatusFirebaseUI();
+      return true;
+    }catch(e){
+      console.log('Config Firebase inválida');
+    }
+  }
+  return false;
+}
+
+function atualizarStatusFirebaseUI(){
+  const statusText = document.getElementById('firebase-status-text');
+  const btnSync = document.getElementById('btn-test-sync');
+  if(firebaseConfig && firebaseConfig.projectId){
+    statusText.textContent = '✓ Configurado: ' + firebaseConfig.projectId;
+    statusText.style.color = 'var(--green)';
+    if(btnSync) btnSync.style.display = 'inline-flex';
+  } else {
+    statusText.textContent = 'Não configurado';
+    statusText.style.color = 'var(--muted)';
+    if(btnSync) btnSync.style.display = 'none';
+  }
+}
+
+function salvarConfigFirebase(){
+  const apiKey = document.getElementById('fb-apiKey').value.trim();
+  const authDomain = document.getElementById('fb-authDomain').value.trim();
+  const projectId = document.getElementById('fb-projectId').value.trim();
+  const databaseURL = document.getElementById('fb-databaseURL').value.trim();
+  
+  if(!apiKey || !authDomain || !projectId || !databaseURL){
+    showToast('Preencha todos os campos!','error');
+    return;
+  }
+  
+  configurarFirebase(apiKey, authDomain, projectId, databaseURL);
+}
+
+function testarSyncFirebase(){
+  if(!firebaseInitialized){
+    showToast('Firebase não conectado','error');
+    return;
+  }
+  atualizarStatusSync('carregando');
+  sincronizarDados();
+}
+
+function initFirebase(){
+  if(firebaseInitialized || !firebaseConfig) return;
+  if(!firebaseConfig.apiKey || !firebaseConfig.projectId){
+    console.log('Firebase não configurado');
+    return;
+  }
+  // Verificar se Firebase SDK está disponível
+  if(typeof firebase === 'undefined'){
+    console.log('Firebase SDK ainda não carregado');
+    return;
+  }
+  try{
+    const app = firebase.initializeApp(firebaseConfig);
+    firebaseDb = firebase.database();
+    firebaseInitialized = true;
+    console.log('Firebase inicializado!');
+    sincronizarDados();
+    atualizarStatusFirebaseUI();
+  }catch(e){
+    console.error('Erro ao iniciar Firebase:', e);
+  }
+}
+
+function sincronizarDados(){
+  if(!firebaseInitialized || !firebaseDb) return;
+  const userId = localStorage.getItem('x1_user_id') || gerarUserId();
+  localStorage.setItem('x1_user_id', userId);
+  
+  // Buscar dados do Firebase
+  firebaseDb.ref('usuarios/' + userId).once('value').then(snapshot => {
+    const dadosCloud = snapshot.val();
+    if(dadosCloud){
+      // Mesclar dados: preferrir dados mais recentes
+      if(dadosCloud.dados) mesclarDados('dados', dadosCloud.dados);
+      if(dadosCloud.ofertas) mesclarDados('ofertas', dadosCloud.ofertas);
+      if(dadosCloud.despesas) mesclarDados('despesas', dadosCloud.despesas);
+      if(dadosCloud.tags) mesclarDados('tags', dadosCloud.tags);
+      if(dadosCloud.metas) metas = {...metas, ...dadosCloud.metas};
+      renderAll();
+      showToast('✓ Dados sincronizados!','success');
+    }
+    ultimaSincronizacao = new Date();
+    atualizarStatusSync('ok');
+  }).catch(err => {
+    console.log('Erro sincronização:', err);
+    atualizarStatusSync('erro');
+  });
+}
+
+function mesclarDados(tipo, dadosCloud){
+  const dadosLocal = tipo === 'dados' ? dados : 
+                     tipo === 'ofertas' ? ofertas :
+                     tipo === 'despesas' ? despesas : tags;
+  
+  if(tipo === 'dados'){
+    // Para registros, mesclar por data mais recente
+    dadosCloud.forEach(regCloud => {
+      const idx = dadosLocal.findIndex(r => r.id === regCloud.id);
+      if(idx >= 0){
+        // Atualizar se o do cloud for mais recente
+        if(new Date(regCloud._updated) > new Date(dadosLocal[idx]._updated || 0)){
+          dadosLocal[idx] = regCloud;
+        }
+      } else {
+        dadosLocal.push(regCloud);
+      }
+    });
+    dadosLocal.sort((a,b) => a.data.localeCompare(b.data));
+    if(tipo === 'dados') save();
+  } else if(tipo === 'ofertas'){
+    dadosCloud.forEach(of => {
+      if(!ofertas.find(o => o.id === of.id)) ofertas.push(of);
+    });
+    saveOfertas();
+  } else if(tipo === 'despesas'){
+    dadosCloud.forEach(dp => {
+      if(!despesas.find(d => d.id === dp.id)) despesas.push(dp);
+    });
+    saveDespesas();
+  } else if(tipo === 'tags'){
+    dadosCloud.forEach(tg => {
+      if(!tags.find(t => t.id === tg.id)) tags.push(tg);
+    });
+    saveTags();
+  }
+}
+
+function pushParaFirebase(){
+  if(!firebaseInitialized || !firebaseDb) return;
+  const userId = localStorage.getItem('x1_user_id');
+  if(!userId) return;
+  
+  const dadosParaSalvar = {
+    dados: dados.map(d => ({...d, _updated: new Date().toISOString()})),
+    ofertas: ofertas,
+    despesas: despesas,
+    tags: tags,
+    metas: metas,
+    _lastUpdate: new Date().toISOString()
+  };
+  
+  firebaseDb.ref('usuarios/' + userId).set(dadosParaSalvar).then(() => {
+    console.log('Dados enviados para Firebase');
+    ultimaSinconerizacao = new Date();
+  }).catch(err => {
+    console.log('Erro ao enviar:', err);
+  });
+}
+
+function gerarUserId(){
+  return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2,9);
+}
+
+function atualizarStatusSync(status){
+  const el = document.getElementById('sync-status');
+  if(!el) return;
+  const icons = { 
+    carregando: '⟳ Sincronizando...', 
+    ok: '☁️ Sincronizado', 
+    erro: '✗ Offline',
+    local: '💾 Local' 
+  };
+  const colors = { 
+    carregando: 'var(--accent)', 
+    ok: 'var(--green)', 
+    erro: 'var(--red)',
+    local: 'var(--muted)'
+  };
+  el.textContent = icons[status] || icons.local;
+  el.style.color = colors[status] || colors.local;
+}
+
+function configurarFirebase(apiKey, authDomain, projectId, databaseURL){
+  firebaseConfig = { apiKey, authDomain, projectId, databaseURL };
+  localStorage.setItem('x1_firebase_config', JSON.stringify(firebaseConfig));
+  showToast('Firebase configurado! Reconectando...', 'success');
+  // Recarregar Firebase
+  location.reload();
+}
+
+// Auto-inicializar Firebase se configurado
+if(carregarConfigFirebase()){
+  // Firebase será inicializado após carregar a biblioteca
+}
+
+// ========== FIM FIREBASE ==========
+
 let dados    = JSON.parse(localStorage.getItem('x1_dados')    ||'[]');
 let ofertas  = JSON.parse(localStorage.getItem('x1_ofertas')  ||'[]');
 let despesas = JSON.parse(localStorage.getItem('x1_despesas') ||'[]');
@@ -1122,18 +1357,22 @@ let charts={}, editId=null, editDespId=null, editOfId=null, confirmCb=null;
 
 function save() {
   localStorage.setItem('x1_dados', JSON.stringify(dados));
+  if(firebaseInitialized) pushParaFirebase();
 }
 
 function saveOfertas() {
   localStorage.setItem('x1_ofertas', JSON.stringify(ofertas));
+  if(firebaseInitialized) pushParaFirebase();
 }
 
 function saveDespesas() {
   localStorage.setItem('x1_despesas', JSON.stringify(despesas));
+  if(firebaseInitialized) pushParaFirebase();
 }
 
 function saveTags() {
   localStorage.setItem('x1_tags', JSON.stringify(tags));
+  if(firebaseInitialized) pushParaFirebase();
 }
 
 function salvarMeta() {
@@ -2226,11 +2465,46 @@ function atualizarHojeHero(){
   if(metaMensal > 0 && metaDash && metaPct){
     const diasMes = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
     const metaDia = metaMensal / diasMes;
-    const pct = Math.max(0, Math.min(lucroHoje / metaDia, 1));
+    // Calcular porcentagem sem limite (pode passar de 100%)
+    const pct = metaDia !== 0 ? (lucroHoje / metaDia) : 0;
+    const pctFormatado = Math.round(pct * 100);
     const circ = 150.8;
-    metaDash.style.stroke = lucroHoje >= metaDia ? 'var(--green)' : lucroHoje > 0 ? 'var(--yellow,#eab308)' : 'var(--border2)';
-    metaDash.style.strokeDashoffset = circ * (1 - pct);
-    metaPct.textContent = Math.round(pct*100) + '%';
+    
+    // Cores: vermelho se negativo, amarelo se positivo mas abaixo da meta, verde se atingiu/excedeu
+    let corStroke = 'var(--border2)';
+    let corTexto = '';
+    
+    if(lucroHoje < 0){
+      // Negativo: vermelho
+      corStroke = 'var(--red)';
+      corTexto = 'neg';
+    } else if(pct >= 1){
+      // Atingiu ou ultrapassou: verde
+      corStroke = 'var(--green)';
+      corTexto = 'pos';
+    } else {
+      // Abaixo da meta mas positivo: amarelo
+      corStroke = 'var(--yellow)';
+    }
+    
+    metaDash.style.stroke = corStroke;
+    metaPct.style.color = corStroke === 'var(--red)' ? 'var(--red)' : (corStroke === 'var(--green)' ? 'var(--green)' : 'var(--yellow)');
+    
+    // Se negativo, mostrar valor negativo; se acima de 100%, mostrar valor real
+    if(lucroHoje < 0){
+      // Para negativo, usar valor proporcional negativo (ex: -20% se meta é 100 e lucro é -20)
+      const pctNegativo = Math.round((lucroHoje / metaDia) * 100);
+      metaPct.textContent = pctNegativo + '%';
+      metaDash.style.strokeDashoffset = circ; // círculo vazio
+    } else {
+      metaPct.textContent = pctFormatado + '%';
+      // Se passou de 100%, círculo completo (offset 0)
+      if(pct >= 1){
+        metaDash.style.strokeDashoffset = 0;
+      } else {
+        metaDash.style.strokeDashoffset = circ * (1 - pct);
+      }
+    }
   } else if(metaPct) {
     metaPct.textContent = metaMensal > 0 ? '0%' : '—';
   }
@@ -2497,6 +2771,12 @@ function initApp() {
   
   atualizarSelects();
   renderAll();
+  
+  // Inicializar Firebase se configurado
+  if(carregarConfigFirebase()){
+    // Pequeno delay para garantir que Firebase SDK esteja carregado
+    setTimeout(initFirebase, 500);
+  }
   
   const syncEl = document.getElementById('sync-status');
   if(syncEl) {
