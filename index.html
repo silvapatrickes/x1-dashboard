@@ -767,6 +767,9 @@ body.light .mini-sel{color-scheme:light;}
 <!-- HISTÓRICO -->
 <div class="view" id="tab-historico">
   <div class="filter-bar">
+    <select id="filtro-mes" onchange="renderTabela()">
+      <option value="">Todos os meses</option>
+    </select>
     <select id="filtro-oferta" onchange="renderTabela()"><option value="">Todas as ofertas</option></select>
     <select id="filtro-tag" onchange="renderTabela()"><option value="">Todas as tags</option></select>
     <select id="filtro-qtd" onchange="renderTabela()" style="margin-left:auto">
@@ -1800,10 +1803,32 @@ function atualizarSelects(){
   document.getElementById('f-oferta').innerHTML=optsR;document.getElementById('m-oferta').innerHTML=optsM;
   ['filtro-oferta','filtro-oferta-graf','hoje-oferta','periodo-oferta'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=optsF;});
   ['filtro-tag','filtro-tag-graf','periodo-tag'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=optsT;});
+  
+  // Popular filtro de meses no Histórico
+  popularFiltroMeses();
+}
+
+function popularFiltroMeses(){
+  const sel = document.getElementById('filtro-mes');
+  if(!sel) return;
+  
+  // Obter todos os meses únicos dos dados
+  const meses = [...new Set(dados.map(d => d.data ? d.data.substring(0, 7) : null).filter(Boolean))].sort().reverse();
+  
+  const nomesMeses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  
+  let html = '<option value="">Todos os meses</option>';
+  meses.forEach(mes => {
+    const [ano, mesNum] = mes.split('-');
+    const nome = `${nomesMeses[parseInt(mesNum) - 1]} ${ano}`;
+    html += `<option value="${mes}">${nome}</option>`;
+  });
+  
+  sel.innerHTML = html;
 }
 
 /* ── FILTRAR ── */
-function filtrar(arr,{oferta,tag,lucroMin,lucroMax,de,ate}={}){
+function filtrar(arr,{oferta,tag,lucroMin,lucroMax,de,ate,mes}={}){
   return arr.filter(d=>{
     if(oferta&&d.ofertaId!=oferta)return false;
     if(tag&&!(d.tags||[]).includes(Number(tag)))return false;
@@ -1811,6 +1836,7 @@ function filtrar(arr,{oferta,tag,lucroMin,lucroMax,de,ate}={}){
     if(lucroMax!==undefined&&lucroMax!==''&&d.lucro>parseFloat(lucroMax))return false;
     if(de&&d.data<de)return false;
     if(ate&&d.data>ate)return false;
+    if(mes&&d.data&&!d.data.startsWith(mes))return false;
     return true;
   });
 }
@@ -1826,7 +1852,7 @@ function limparTodosDados() {
   renderAll();
   showToast('✅ Todos os dados foram limpos!');
 }
-function limparFiltros(){['filtro-oferta','filtro-tag','filtro-lucro-min','filtro-lucro-max'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});renderTabela();}
+function limparFiltros(){['filtro-oferta','filtro-tag','filtro-lucro-min','filtro-lucro-max','filtro-mes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});renderTabela();}
 
 /* ── STATS ── */
 function calcStats(lista){
@@ -2212,8 +2238,28 @@ function tRow(d){
     <td><button class="action-btn" onclick="abrirEdicao(${d.id})">✏️</button><button class="action-btn" onclick="deletar(${d.id})">✕</button></td>
   </tr>`;
 }
-function tabelaHTML(rows){
-  return `<table><thead><tr><th>Data</th><th>Oferta</th><th>Dólar</th><th>IOF%</th><th>Gastos $</th><th>Gastos R$</th><th>IOF R$</th><th>CB%</th><th>CB R$</th><th>Receita</th><th>Adicional</th><th>Lucro</th><th>Margem</th><th>ROI</th><th>Vendas</th><th>Ticket</th><th>Tags</th><th>Nota</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+function tabelaHTML(rows, totais){
+  const lucroClass = totais.lucro >= 0 ? 'td-green' : 'td-red';
+  return `<table><thead><tr><th>Data</th><th>Oferta</th><th>Dólar</th><th>IOF%</th><th>Gastos $</th><th>Gastos R$</th><th>IOF R$</th><th>CB%</th><th>CB R$</th><th>Receita</th><th>Adicional</th><th>Lucro</th><th>Margem</th><th>ROI</th><th>Vendas</th><th>Ticket</th><th>Tags</th><th>Nota</th><th></th></tr></thead><tbody>${rows}</tbody><tfoot><tr style="background:var(--surface2);font-weight:700;">
+    <td colspan="2" style="text-align:left">TOTAL</td>
+    <td>${fmtN(totais.dolar)}</td>
+    <td>—</td>
+    <td class="td-red">${fmtN(totais.gastosUSD)}</td>
+    <td class="td-red">${fmtBRL(totais.gastosBRL)}</td>
+    <td class="td-muted">${fmtBRL(totais.iofBRL)}</td>
+    <td>—</td>
+    <td class="td-green">${fmtBRL(totais.cashbackBRL)}</td>
+    <td class="td-green">${fmtBRL(totais.receita)}</td>
+    <td class="td-muted">${fmtBRL(totais.adicional)}</td>
+    <td class="${lucroClass}">${fmtBRL(totais.lucro)}</td>
+    <td>—</td>
+    <td>—</td>
+    <td>${totais.vendas}</td>
+    <td class="td-muted">${fmtBRL(totais.vendas > 0 ? totais.receita/totais.vendas : 0)}</td>
+    <td>—</td>
+    <td>—</td>
+    <td></td>
+  </tr></tfoot></table>`;
 }
 
 /* ── TABELA ── */
@@ -2226,6 +2272,7 @@ function renderTabela(pag) {
     tag: document.getElementById('filtro-tag').value,
     lucroMin: document.getElementById('filtro-lucro-min').value,
     lucroMax: document.getElementById('filtro-lucro-max').value,
+    mes: document.getElementById('filtro-mes').value,
   });
   const cont = document.getElementById('table-container');
   const contReg = document.getElementById('hist-reg-list');
@@ -2251,7 +2298,21 @@ function renderTabela(pag) {
   const fim = Math.min(inicio + qtd, total);
   const pagina = sorted.slice(inicio, fim);
 
-  if (cont) cont.innerHTML = tabelaHTML(pagina.map(d => tRow(d)).join(''));
+  // Calcular totais da página
+  const totais = {
+    dolar: pagina.reduce((s,d) => s + (d.dolar||0), 0),
+    gastosUSD: pagina.reduce((s,d) => s + (d.gastosUSD||0), 0),
+    gastosBRL: pagina.reduce((s,d) => s + (d.gastosBRL||0), 0),
+    iofBRL: pagina.reduce((s,d) => s + (d.iofBRL||0), 0),
+    cashbackBRL: pagina.reduce((s,d) => s + (d.cashbackBRL||0), 0),
+    receita: pagina.reduce((s,d) => s + (d.receita||0), 0),
+    adicional: pagina.reduce((s,d) => s + (d.adicional||0), 0),
+    lucro: pagina.reduce((s,d) => s + (d.lucro||0), 0),
+    vendas: pagina.reduce((s,d) => s + (d.vendas||0), 0),
+    ticket: pagina.reduce((s,d) => s + (d.ticket||0), 0),
+  };
+
+  if (cont) cont.innerHTML = tabelaHTML(pagina.map(d => tRow(d)).join(''), totais);
   if (contReg) contReg.innerHTML = pagina.map(d => regCard(d)).join('');
 
   // Info
