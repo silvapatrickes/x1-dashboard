@@ -1884,7 +1884,7 @@ function renderKPIs(){
   sk('kpi-receita',fmtBRL(tR));sk('kpi-gastos',fmtBRL(tG));
   sk('kpi-lucro',fmtBRL(tL),tL<0?'neg':tL>0?'pos':'');
   sk('kpi-lucro-bruto',fmtBRL(tLbrutoPuro),tLbrutoPuro<0?'neg':tLbrutoPuro>0?'pos':'');
-  sk('kpi-roi',dados.length?fmtN(aROI,4):'N/A',aROI<1&&dados.length?'neg':'');
+  sk('kpi-roi',dadosMes.length?fmtN(aROI,4):'N/A',aROI<1&&dadosMes.length?'neg':'');
   sk('kpi-margem',margem!==null?fmtPct(margem):'N/A',margem!==null?(margem<0?'neg':margem>0?'pos':''):'');
   sk('kpi-iof',fmtBRL(tIOF));sk('kpi-vendas',tV);sk('kpi-ticket',fmtBRL(aT));sk('kpi-cashback',fmtBRL(tCB));
   sk('kpi-despesas',fmtBRL(totalDesp),'neg');
@@ -2512,12 +2512,30 @@ function atualizarHojeHero(){
 
 /* ── KPI HIGHLIGHTS (6 cards) ── */
 function atualizarKPIHighlights(){
-  if(!dados) return;
-  const lista = filtrar(dados, {});
-  const tL = lista.reduce((s,d)=>s+(d.lucro||0),0);
-  const tR = lista.reduce((s,d)=>s+(d.receita||0),0);
-  const tG = lista.reduce((s,d)=>s+(d.gastosBRL||0),0);
-  const tV = lista.reduce((s,d)=>s+(d.vendas||0),0);
+  // Filtrar apenas dados do mês atual
+  const now = new Date();
+  const anoMes = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const dadosMes = dados.filter(d => d.data && d.data.startsWith(anoMes));
+  
+  if(!dadosMes.length) {
+    // Se não dados no mês, limpar campos
+    const zerar = ['r6-lucro','r6-receita','r6-roi','r6-gastos','r6-vendas','r6-ticket'];
+    zerar.forEach(id => {
+      const el = document.getElementById(id);
+      if(el){
+        if(id === 'r6-vendas') el.textContent = '0';
+        else if(id === 'r6-roi') el.textContent = '—';
+        else el.textContent = 'R$ 0,00';
+        el.className = 'kpi-value';
+      }
+    });
+    return;
+  }
+  
+  const tL = dadosMes.reduce((s,d)=>s+(d.lucro||0),0);
+  const tR = dadosMes.reduce((s,d)=>s+(d.receita||0),0);
+  const tG = dadosMes.reduce((s,d)=>s+(d.gastosBRL||0),0);
+  const tV = dadosMes.reduce((s,d)=>s+(d.vendas||0),0);
   const aROI = tG > 0 ? tR/tG : null;
   const aT = tV > 0 ? tR/tV : null;
 
@@ -2593,13 +2611,20 @@ function renderHeatmap(){
 function renderROIAlert(){
   const wrap = document.getElementById('roi-alert-wrap');
   const list = document.getElementById('roi-alert-list');
-  if(!wrap||!list||!dados.length) return;
-  const comROI = dados.filter(d=>d.roi&&d.roi>0);
+  if(!wrap||!list) return;
+  
+  // Filtrar apenas dados do mês atual
+  const now = new Date();
+  const anoMes = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const dadosMes = dados.filter(d => d.data && d.data.startsWith(anoMes));
+  
+  if(!dadosMes.length){ wrap.style.display='none'; return; }
+  const comROI = dadosMes.filter(d=>d.roi&&d.roi>0);
   if(!comROI.length){ wrap.style.display='none'; return; }
   const roiMedio = comROI.reduce((s,d)=>s+d.roi,0) / comROI.length;
   const limiar = roiMedio * 0.7;
   const porOferta = {};
-  dados.forEach(d=>{
+  dadosMes.forEach(d=>{
     if(!d.ofertaNome||!d.roi) return;
     if(!porOferta[d.ofertaNome]) porOferta[d.ofertaNome]={soma:0,n:0};
     porOferta[d.ofertaNome].soma += d.roi;
