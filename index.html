@@ -2125,7 +2125,8 @@ function renderAll(){
 }
 
 function atualizarHeaderRevenue(){
-  const total=dados.reduce((s,d)=>s+d.receita,0);
+  const filtrados=dados.filter(d=>d.data.startsWith('2026'));
+  const total=filtrados.reduce((s,d)=>s+d.receita,0);
   const meta=1000000;
   const el=document.getElementById('header-rev-value');
   if(el) el.textContent=fmtBRL(total);
