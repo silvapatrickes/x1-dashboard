@@ -592,6 +592,23 @@ body.light .mini-sel{color-scheme:light;}
         <div class="meta-wrap"><span class="meta-label">Meta mês</span><input class="meta-input" type="number" id="meta-mensal" placeholder="Ex: 10000" oninput="salvarMeta();renderKPIs();"></div>
       </div>
     </div>
+    <!-- SELETOR DE PERÍODO DO RESUMO -->
+    <div style="margin-bottom:.65rem;">
+      <select class="mini-sel" id="resumo-periodo" onchange="onResumoPeriodoChange()" style="width:100%;font-size:.75rem;padding:.42rem .75rem;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:'Inter',sans-serif;">
+        <option value="mes">Esse mês</option>
+        <option value="hoje">Hoje</option>
+        <option value="ontem">Ontem</option>
+        <option value="7d">Últimos 7 dias</option>
+        <option value="mes_passado">Mês passado</option>
+        <option value="maximo">Máximo</option>
+        <option value="personalizado">Personalizado</option>
+      </select>
+      <div id="resumo-periodo-custom" style="display:none;margin-top:.4rem;gap:.4rem;align-items:center;flex-wrap:wrap;">
+        <input type="date" id="resumo-de" style="background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:.35rem .6rem;color:var(--text);font-family:'Inter',sans-serif;font-size:.73rem;outline:none;color-scheme:dark;" onchange="renderKPIs()">
+        <span style="font-size:.68rem;color:var(--muted);">→</span>
+        <input type="date" id="resumo-ate" style="background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:.35rem .6rem;color:var(--text);font-family:'Inter',sans-serif;font-size:.73rem;outline:none;color-scheme:dark;" onchange="renderKPIs()">
+      </div>
+    </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.75rem;" id="resumo-6cards">
       <div class="kpi"><div class="kpi-label">💰 Lucro Líquido</div><div class="kpi-value" id="r6-lucro">R$ 0,00</div></div>
       <div class="kpi"><div class="kpi-label">📈 Receita</div><div class="kpi-value" id="r6-receita">R$ 0,00</div></div>
@@ -1619,12 +1636,57 @@ function calcStats(lista){
   return {tR,tG,tL,tV,tCB,tIOF,aROI,aT};
 }
 
+/* ── PERÍODO DO RESUMO ── */
+function getResumoPeriodoDados(){
+  const sel = document.getElementById('resumo-periodo');
+  const periodo = sel ? sel.value : 'mes';
+  const now = new Date();
+  const localDate = d => { const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dia=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${dia}`; };
+  let de = null, ate = null, label = '';
+  const nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  if(periodo === 'hoje'){
+    de = ate = localDate(now); label = 'Hoje';
+  } else if(periodo === 'ontem'){
+    const d = new Date(now); d.setDate(d.getDate()-1); de = ate = localDate(d); label = 'Ontem';
+  } else if(periodo === '7d'){
+    const d = new Date(now); d.setDate(d.getDate()-6); de = localDate(d); ate = localDate(now); label = 'Últimos 7 dias';
+  } else if(periodo === 'mes'){
+    de = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+    ate = localDate(now);
+    label = `${nomes[now.getMonth()]} ${now.getFullYear()}`;
+  } else if(periodo === 'mes_passado'){
+    const d = new Date(now.getFullYear(), now.getMonth()-1, 1);
+    const fim = new Date(now.getFullYear(), now.getMonth(), 0);
+    de = localDate(d); ate = localDate(fim);
+    label = `${nomes[d.getMonth()]} ${d.getFullYear()}`;
+  } else if(periodo === 'maximo'){
+    de = null; ate = null; label = 'Máximo';
+  } else if(periodo === 'personalizado'){
+    de = document.getElementById('resumo-de')?.value || null;
+    ate = document.getElementById('resumo-ate')?.value || null;
+    label = de && ate ? `${de.split('-').reverse().join('/')} → ${ate.split('-').reverse().join('/')}` : 'Personalizado';
+  }
+  const filtrado = dados.filter(d => {
+    if(!d.data) return false;
+    if(!de && !ate) return true; // máximo
+    if(de && d.data < de) return false;
+    if(ate && d.data > ate) return false;
+    return true;
+  });
+  return { filtrado, label, periodo };
+}
+
+function onResumoPeriodoChange(){
+  const sel = document.getElementById('resumo-periodo');
+  const custom = document.getElementById('resumo-periodo-custom');
+  if(custom) custom.style.display = sel?.value === 'personalizado' ? 'flex' : 'none';
+  renderKPIs();
+}
+
 /* ── KPIs GLOBAIS ── */
 function renderKPIs(){
-  // Filtrar apenas os dados do mês atual
+  const { filtrado: dadosMes, label: labelPeriodo, periodo } = getResumoPeriodoDados();
   const now = new Date();
-  const anoMes = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  const dadosMes = dados.filter(d => d.data && d.data.startsWith(anoMes));
 
   const totalDesp=despesas.reduce((s,d)=>s+d.valor,0);
   const tR=dadosMes.reduce((s,d)=>s+d.receita,0);
@@ -1656,10 +1718,9 @@ function renderKPIs(){
 
   const sk=(id,val,cls)=>{const el=document.getElementById(id);if(!el)return;el.textContent=val;el.className='kpi-value'+(cls?' '+cls:'');};
 
-  // Atualizar título com nome do mês
-  const nomeMes=now.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  // Atualizar título com período selecionado
   const tituloEl=document.getElementById('strip-title-mes');
-  if(tituloEl) tituloEl.textContent=`Resumo — ${nomeMes.charAt(0).toUpperCase()+nomeMes.slice(1)}`;
+  if(tituloEl) tituloEl.textContent=`Resumo — ${labelPeriodo}`;
 
   // Lucro Bruto = receita - gastos sem IOF e sem despesas do mês
   const tLbrutoPuro = dadosMes.reduce((s,d) => s + (d.receita - (d.gastosUSD||0)*(d.dolar||0)), 0);
@@ -2347,10 +2408,8 @@ function atualizarHojeHero(){
 
 /* ── KPI HIGHLIGHTS (6 cards) ── */
 function atualizarKPIHighlights(){
-  // Filtrar apenas dados do mês atual
-  const now = new Date();
-  const anoMes = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  const dadosMes = dados.filter(d => d.data && d.data.startsWith(anoMes));
+  // Usar o mesmo período selecionado no resumo
+  const { filtrado: dadosMes } = getResumoPeriodoDados();
   
   if(!dadosMes.length) {
     // Se não dados no mês, limpar campos
