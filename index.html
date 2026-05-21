@@ -592,21 +592,24 @@ body.light .mini-sel{color-scheme:light;}
         <div class="meta-wrap"><span class="meta-label">Meta mês</span><input class="meta-input" type="number" id="meta-mensal" placeholder="Ex: 10000" oninput="salvarMeta();renderKPIs();"></div>
       </div>
     </div>
-    <!-- SELETOR DE PERÍODO DO RESUMO -->
-    <div style="margin-bottom:.65rem;">
-      <select class="mini-sel" id="resumo-periodo" onchange="onResumoPeriodoChange()" style="width:100%;font-size:.75rem;padding:.42rem .75rem;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:'Inter',sans-serif;">
+    <!-- SELETOR DE PERÍODO COMPACTO -->
+    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-bottom:.65rem;">
+      <span style="font-size:.6rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;">Período</span>
+      <select class="mini-sel" id="resumo-periodo" onchange="onResumoPeriodoChange()" style="flex:1;min-width:130px;font-size:.73rem;">
         <option value="mes">Esse mês</option>
         <option value="hoje">Hoje</option>
         <option value="ontem">Ontem</option>
         <option value="7d">Últimos 7 dias</option>
         <option value="mes_passado">Mês passado</option>
-        <option value="maximo">Máximo</option>
+        <option value="ano_atual">Este ano</option>
+        <option value="ano_passado">Ano passado</option>
+        <option value="maximo">Máximo (tudo)</option>
         <option value="personalizado">Personalizado</option>
       </select>
-      <div id="resumo-periodo-custom" style="display:none;margin-top:.4rem;gap:.4rem;align-items:center;flex-wrap:wrap;">
-        <input type="date" id="resumo-de" style="background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:.35rem .6rem;color:var(--text);font-family:'Inter',sans-serif;font-size:.73rem;outline:none;color-scheme:dark;" onchange="renderKPIs()">
-        <span style="font-size:.68rem;color:var(--muted);">→</span>
-        <input type="date" id="resumo-ate" style="background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:.35rem .6rem;color:var(--text);font-family:'Inter',sans-serif;font-size:.73rem;outline:none;color-scheme:dark;" onchange="renderKPIs()">
+      <div id="resumo-periodo-custom" style="display:none;gap:.3rem;align-items:center;">
+        <input type="date" id="resumo-de" style="background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:.28rem .5rem;color:var(--text);font-family:'Inter',sans-serif;font-size:.7rem;outline:none;color-scheme:dark;" onchange="renderKPIsComHighlights()">
+        <span style="font-size:.65rem;color:var(--muted);">→</span>
+        <input type="date" id="resumo-ate" style="background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:.28rem .5rem;color:var(--text);font-family:'Inter',sans-serif;font-size:.7rem;outline:none;color-scheme:dark;" onchange="renderKPIsComHighlights()">
       </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.75rem;" id="resumo-6cards">
@@ -1659,6 +1662,10 @@ function getResumoPeriodoDados(){
     const fim = new Date(now.getFullYear(), now.getMonth(), 0);
     de = localDate(d); ate = localDate(fim);
     label = `${nomes[d.getMonth()]} ${d.getFullYear()}`;
+  } else if(periodo === 'ano_atual'){
+    de = `${now.getFullYear()}-01-01`; ate = localDate(now); label = `Ano ${now.getFullYear()}`;
+  } else if(periodo === 'ano_passado'){
+    const y = now.getFullYear()-1; de = `${y}-01-01`; ate = `${y}-12-31`; label = `Ano ${y}`;
   } else if(periodo === 'maximo'){
     de = null; ate = null; label = 'Máximo';
   } else if(periodo === 'personalizado'){
@@ -1676,11 +1683,16 @@ function getResumoPeriodoDados(){
   return { filtrado, label, periodo };
 }
 
+function renderKPIsComHighlights(){
+  renderKPIs();
+  atualizarKPIHighlights();
+}
+
 function onResumoPeriodoChange(){
   const sel = document.getElementById('resumo-periodo');
   const custom = document.getElementById('resumo-periodo-custom');
   if(custom) custom.style.display = sel?.value === 'personalizado' ? 'flex' : 'none';
-  renderKPIs();
+  renderKPIsComHighlights();
 }
 
 /* ── KPIs GLOBAIS ── */
@@ -2214,7 +2226,7 @@ function switchTab(tab,el,idx){
   if(tab==='periodo') { renderPeriodo(); }
   if(tab==='crescimento') setTimeout(renderCrescimento,50);
   if(tab==='historico') renderTabela();
-  if(tab==='resumo') { renderKPIs(); renderHoje(); atualizarHojeHero(); atualizarKPIHighlights(); }
+  if(tab==='resumo') { renderKPIsComHighlights(); renderHoje(); atualizarHojeHero(); }
   atualizarHeaderRevenue();
   if(tab==='perfil') carregarPerfil();
   window.scrollTo(0,0);
