@@ -2639,13 +2639,27 @@ function iniciarSwipe(){
 
 /* ── EXPORTAR BACKUP COMPLETO ── */
 function exportarBackup(){
-  const backup = { versao:2, exportadoEm: new Date().toISOString(), dados, ofertas, despesas, tags, metas };
+  const perfil = {
+    nome:  localStorage.getItem('x1_nome')  || '',
+    email: localStorage.getItem('x1_email') || '',
+  };
+  const backup = {
+    versao: 3,
+    exportadoEm: new Date().toISOString(),
+    dados,
+    ofertas,
+    despesas,
+    tags,
+    metas,
+    perfil,
+  };
   const json = JSON.stringify(backup, null, 2);
   const blob = new Blob([json], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url; a.download=`x1-backup-${hoje}.json`; a.click();
   URL.revokeObjectURL(url);
-  showToast('✓ Backup exportado!','success');
+  const total = dados.length;
+  showToast(`✓ Backup completo! ${total} registros, ${ofertas.length} ofertas, ${despesas.length} despesas.`,'success');
 }
 
 /* ── EXPORTAR LOCALSTORAGE (sistema antigo) ── */
@@ -2681,18 +2695,77 @@ async function importarBackup(input){
   try{
     const text = await file.text();
     const backup = JSON.parse(text);
+
+    // ── DADOS ──
     const dadosImport = backup.dados || backup.registros || [];
-    if(!dadosImport.length){ status.textContent='⚠ Nenhum registro encontrado.'; return; }
-    status.textContent = `⏳ Importando ${dadosImport.length} registros...`;
-    dadosImport.forEach(d => {
-      dados.push({...d, id: d.id || Date.now() + Math.random()});
-    });
-    dados.sort((a,b) => a.data.localeCompare(b.data));
-    save();
-    status.textContent = `✅ ${dadosImport.length} registros importados!`;
-    showToast(`✓ ${dadosImport.length} registros importados!`,'success');
+    if(dadosImport.length){
+      // Merge: mantém existentes, adiciona novos por ID
+      const idsExistentes = new Set(dados.map(d=>d.id));
+      dadosImport.forEach(d => {
+        if(idsExistentes.has(d.id)){
+          // Atualiza existente
+          const idx = dados.findIndex(r=>r.id===d.id);
+          if(idx!==-1) dados[idx] = d;
+        } else {
+          dados.push({...d, id: d.id || Date.now() + Math.random()});
+        }
+      });
+      dados.sort((a,b) => a.data.localeCompare(b.data));
+      save();
+    }
+
+    // ── OFERTAS ──
+    if(backup.ofertas?.length){
+      const idsOf = new Set(ofertas.map(o=>o.id));
+      backup.ofertas.forEach(o => { if(!idsOf.has(o.id)) ofertas.push(o); });
+      localStorage.setItem('x1_ofertas', JSON.stringify(ofertas));
+    }
+
+    // ── DESPESAS ──
+    if(backup.despesas?.length){
+      const idsDe = new Set(despesas.map(d=>d.id));
+      backup.despesas.forEach(d => { if(!idsDe.has(d.id)) despesas.push(d); });
+      localStorage.setItem('x1_despesas', JSON.stringify(despesas));
+    }
+
+    // ── TAGS ──
+    if(backup.tags?.length){
+      const idsTg = new Set(tags.map(t=>t.id));
+      backup.tags.forEach(t => { if(!idsTg.has(t.id)) tags.push(t); });
+      localStorage.setItem('x1_tags', JSON.stringify(tags));
+    }
+
+    // ── METAS ──
+    if(backup.metas && Object.keys(backup.metas).length){
+      metas = { ...backup.metas };
+      localStorage.setItem('x1_metas', JSON.stringify(metas));
+      // Preenche input de meta mensal se existir
+      const metaEl = document.getElementById('meta-mensal');
+      if(metaEl && metas.mensal) metaEl.value = metas.mensal;
+      const metaEl2 = document.getElementById('meta-mensal2');
+      if(metaEl2 && metas.mensal) metaEl2.value = metas.mensal;
+    }
+
+    // ── PERFIL ──
+    if(backup.perfil){
+      if(backup.perfil.nome)  localStorage.setItem('x1_nome',  backup.perfil.nome);
+      if(backup.perfil.email) localStorage.setItem('x1_email', backup.perfil.email);
+    }
+
     renderAll();
-  } catch(e){ status.textContent='❌ Erro: '+e.message; }
+    atualizarSelects();
+
+    const resumo = [
+      `${dadosImport.length} registros`,
+      backup.ofertas?.length ? `${backup.ofertas.length} ofertas` : '',
+      backup.despesas?.length ? `${backup.despesas.length} despesas` : '',
+      backup.tags?.length ? `${backup.tags.length} tags` : '',
+      backup.metas && Object.keys(backup.metas).length ? 'metas' : '',
+    ].filter(Boolean).join(', ');
+
+    status.textContent = `✅ Importado com sucesso: ${resumo}`;
+    showToast(`✓ Backup restaurado!`,'success');
+  } catch(e){ status.textContent='❌ Erro ao importar: '+e.message; console.error(e); }
   input.value='';
 }
 
