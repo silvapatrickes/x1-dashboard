@@ -32,9 +32,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .header-rev-value{font-size:.85rem;font-weight:700;color:var(--text);}
 .header-rev-sep{font-size:.7rem;color:var(--muted2);}
 .header-rev-target{font-size:.72rem;color:var(--muted);font-weight:500;}
-.header-rev-pct{font-size:.65rem;color:var(--accent);font-weight:700;background:rgba(59,130,246,.12);padding:.1rem .35rem;border-radius:999px;}
-.header-rev-bar{height:6px;background:var(--border2);border-radius:999px;overflow:hidden;flex:1 1 100%;margin:3px 0 0;}
-.header-rev-fill{height:100%;background:var(--accent);border-radius:999px;transition:width .6s ease;}
+.header-rev-pct{font-size:.6rem;color:var(--accent);font-weight:600;}
+.header-rev-bar{height:3px;background:var(--border2);border-radius:2px;overflow:hidden;flex:1 1 100%;margin:1px 0 0;}
+.header-rev-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .6s ease;}
 .header-right{display:flex;align-items:center;gap:.35rem;flex-shrink:0;}
 .header-date{font-size:.62rem;color:var(--muted);display:none;}
 .ai-btn{background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.3);color:#c084fc;border-radius:8px;padding:.32rem .7rem;font-size:.72rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.3rem;font-family:'Inter',sans-serif;}
@@ -590,26 +590,6 @@ body.light .mini-sel{color-scheme:light;}
       <div class="strip-title" id="strip-title-mes">Resumo — Mês Atual</div>
       <div class="meta-row">
         <div class="meta-wrap"><span class="meta-label">Meta mês</span><input class="meta-input" type="number" id="meta-mensal" placeholder="Ex: 10000" oninput="salvarMeta();renderKPIs();"></div>
-      </div>
-    </div>
-    <!-- SELETOR DE PERÍODO COMPACTO -->
-    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-bottom:.65rem;">
-      <span style="font-size:.6rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;">Período</span>
-      <select class="mini-sel" id="resumo-periodo" onchange="onResumoPeriodoChange()" style="flex:1;min-width:130px;font-size:.73rem;">
-        <option value="mes">Esse mês</option>
-        <option value="hoje">Hoje</option>
-        <option value="ontem">Ontem</option>
-        <option value="7d">Últimos 7 dias</option>
-        <option value="mes_passado">Mês passado</option>
-        <option value="ano_atual">Este ano</option>
-        <option value="ano_passado">Ano passado</option>
-        <option value="maximo">Máximo (tudo)</option>
-        <option value="personalizado">Personalizado</option>
-      </select>
-      <div id="resumo-periodo-custom" style="display:none;gap:.3rem;align-items:center;">
-        <input type="date" id="resumo-de" style="background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:.28rem .5rem;color:var(--text);font-family:'Inter',sans-serif;font-size:.7rem;outline:none;color-scheme:dark;" onchange="renderKPIsComHighlights()">
-        <span style="font-size:.65rem;color:var(--muted);">→</span>
-        <input type="date" id="resumo-ate" style="background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:.28rem .5rem;color:var(--text);font-family:'Inter',sans-serif;font-size:.7rem;outline:none;color-scheme:dark;" onchange="renderKPIsComHighlights()">
       </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.75rem;" id="resumo-6cards">
@@ -1332,8 +1312,28 @@ function lerCampos(p='f-'){
 }
 function salvarRegistro(){
   const d=lerCampos('f-');if(!d.data){showToast('Informe a data!');return;}
-  dados.push({id:Date.now(),...d});dados.sort((a,b)=>a.data.localeCompare(b.data));
-  save();renderAll();showToast('Registro salvo!');limparForm();
+
+  // Verifica se já existe registro com mesma data + mesma oferta
+  const idxExistente = dados.findIndex(r => r.data === d.data && r.ofertaId === d.ofertaId);
+
+  if(idxExistente !== -1){
+    // Já existe — pergunta se quer atualizar
+    const ofertaNome = ofertas.find(o=>o.id==d.ofertaId)?.nome || 'esta oferta';
+    confirmar(
+      `Atualizar registro de hoje?`,
+      `Já existe um lançamento de "${ofertaNome}" em ${d.data.split('-').reverse().join('/')}. Deseja sobrescrever com os novos dados?`,
+      () => {
+        dados[idxExistente] = { id: dados[idxExistente].id, ...d };
+        dados.sort((a,b)=>a.data.localeCompare(b.data));
+        save();renderAll();showToast('Registro atualizado!');limparForm();
+      }
+    );
+  } else {
+    // Novo registro
+    dados.push({id:Date.now(),...d});
+    dados.sort((a,b)=>a.data.localeCompare(b.data));
+    save();renderAll();showToast('Registro salvo!');limparForm();
+  }
 }
 function limparForm(){
   ['f-dolar','f-gastos-usd','f-gastos-brl','f-iof-brl','f-cashback','f-cashback-brl','f-receita','f-adicional','f-vendas','f-lucro','f-margem','f-roi','f-ticket','f-nota'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='';}});
@@ -1639,66 +1639,12 @@ function calcStats(lista){
   return {tR,tG,tL,tV,tCB,tIOF,aROI,aT};
 }
 
-/* ── PERÍODO DO RESUMO ── */
-function getResumoPeriodoDados(){
-  const sel = document.getElementById('resumo-periodo');
-  const periodo = sel ? sel.value : 'mes';
-  const now = new Date();
-  const localDate = d => { const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dia=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${dia}`; };
-  let de = null, ate = null, label = '';
-  const nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  if(periodo === 'hoje'){
-    de = ate = localDate(now); label = 'Hoje';
-  } else if(periodo === 'ontem'){
-    const d = new Date(now); d.setDate(d.getDate()-1); de = ate = localDate(d); label = 'Ontem';
-  } else if(periodo === '7d'){
-    const d = new Date(now); d.setDate(d.getDate()-6); de = localDate(d); ate = localDate(now); label = 'Últimos 7 dias';
-  } else if(periodo === 'mes'){
-    de = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
-    ate = localDate(now);
-    label = `${nomes[now.getMonth()]} ${now.getFullYear()}`;
-  } else if(periodo === 'mes_passado'){
-    const d = new Date(now.getFullYear(), now.getMonth()-1, 1);
-    const fim = new Date(now.getFullYear(), now.getMonth(), 0);
-    de = localDate(d); ate = localDate(fim);
-    label = `${nomes[d.getMonth()]} ${d.getFullYear()}`;
-  } else if(periodo === 'ano_atual'){
-    de = `${now.getFullYear()}-01-01`; ate = localDate(now); label = `Ano ${now.getFullYear()}`;
-  } else if(periodo === 'ano_passado'){
-    const y = now.getFullYear()-1; de = `${y}-01-01`; ate = `${y}-12-31`; label = `Ano ${y}`;
-  } else if(periodo === 'maximo'){
-    de = null; ate = null; label = 'Máximo';
-  } else if(periodo === 'personalizado'){
-    de = document.getElementById('resumo-de')?.value || null;
-    ate = document.getElementById('resumo-ate')?.value || null;
-    label = de && ate ? `${de.split('-').reverse().join('/')} → ${ate.split('-').reverse().join('/')}` : 'Personalizado';
-  }
-  const filtrado = dados.filter(d => {
-    if(!d.data) return false;
-    if(!de && !ate) return true; // máximo
-    if(de && d.data < de) return false;
-    if(ate && d.data > ate) return false;
-    return true;
-  });
-  return { filtrado, label, periodo };
-}
-
-function renderKPIsComHighlights(){
-  renderKPIs();
-  atualizarKPIHighlights();
-}
-
-function onResumoPeriodoChange(){
-  const sel = document.getElementById('resumo-periodo');
-  const custom = document.getElementById('resumo-periodo-custom');
-  if(custom) custom.style.display = sel?.value === 'personalizado' ? 'flex' : 'none';
-  renderKPIsComHighlights();
-}
-
 /* ── KPIs GLOBAIS ── */
 function renderKPIs(){
-  const { filtrado: dadosMes, label: labelPeriodo, periodo } = getResumoPeriodoDados();
+  // Filtrar apenas os dados do mês atual
   const now = new Date();
+  const anoMes = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const dadosMes = dados.filter(d => d.data && d.data.startsWith(anoMes));
 
   const totalDesp=despesas.reduce((s,d)=>s+d.valor,0);
   const tR=dadosMes.reduce((s,d)=>s+d.receita,0);
@@ -1730,9 +1676,10 @@ function renderKPIs(){
 
   const sk=(id,val,cls)=>{const el=document.getElementById(id);if(!el)return;el.textContent=val;el.className='kpi-value'+(cls?' '+cls:'');};
 
-  // Atualizar título com período selecionado
+  // Atualizar título com nome do mês
+  const nomeMes=now.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
   const tituloEl=document.getElementById('strip-title-mes');
-  if(tituloEl) tituloEl.textContent=`Resumo — ${labelPeriodo}`;
+  if(tituloEl) tituloEl.textContent=`Resumo — ${nomeMes.charAt(0).toUpperCase()+nomeMes.slice(1)}`;
 
   // Lucro Bruto = receita - gastos sem IOF e sem despesas do mês
   const tLbrutoPuro = dadosMes.reduce((s,d) => s + (d.receita - (d.gastosUSD||0)*(d.dolar||0)), 0);
@@ -2226,8 +2173,7 @@ function switchTab(tab,el,idx){
   if(tab==='periodo') { renderPeriodo(); }
   if(tab==='crescimento') setTimeout(renderCrescimento,50);
   if(tab==='historico') renderTabela();
-  if(tab==='resumo') { renderKPIsComHighlights(); renderHoje(); atualizarHojeHero(); }
-  atualizarHeaderRevenue();
+  if(tab==='resumo') { renderKPIs(); renderHoje(); atualizarHojeHero(); atualizarKPIHighlights(); }
   if(tab==='perfil') carregarPerfil();
   window.scrollTo(0,0);
 }
@@ -2350,9 +2296,25 @@ async function salvarQuickRegistro(){
   const ticket = vendas > 0 ? receita/vendas : null;
   const ofertaNome = ofertaId ? (ofertas.find(o=>o.id===ofertaId)||{}).nome : null;
   const registro = { data, ofertaId, ofertaNome, dolar, gastosUSD, gastosBRL, iof, iofBRL, receita, lucro, margem, roi, vendas, ticket, cashback:0, cashbackBRL:0, adicional:0, tags:[], obs:'' };
-  const ok = await salvarRegistro(registro);
-  if(ok){ fecharQuickForm(); showToast('✓ Registro salvo!','success'); }
-  else showToast('Erro ao salvar','error');
+
+  // Verifica duplicata (mesma data + mesma oferta)
+  const idxExistente = dados.findIndex(r => r.data === data && r.ofertaId === ofertaId);
+  if(idxExistente !== -1){
+    const nomeOferta = ofertas.find(o=>o.id==ofertaId)?.nome || 'esta oferta';
+    confirmar(
+      `Atualizar registro de hoje?`,
+      `Já existe um lançamento de "${nomeOferta}" em ${data.split('-').reverse().join('/')}. Deseja sobrescrever?`,
+      () => {
+        dados[idxExistente] = { id: dados[idxExistente].id, ...registro };
+        dados.sort((a,b)=>a.data.localeCompare(b.data));
+        save();renderAll();fecharQuickForm();showToast('✓ Registro atualizado!');
+      }
+    );
+  } else {
+    dados.push({ id: Date.now(), ...registro });
+    dados.sort((a,b)=>a.data.localeCompare(b.data));
+    save();renderAll();fecharQuickForm();showToast('✓ Registro salvo!');
+  }
 }
 
 /* ── HOJE HERO CARD ── */
@@ -2420,8 +2382,10 @@ function atualizarHojeHero(){
 
 /* ── KPI HIGHLIGHTS (6 cards) ── */
 function atualizarKPIHighlights(){
-  // Usar o mesmo período selecionado no resumo
-  const { filtrado: dadosMes } = getResumoPeriodoDados();
+  // Filtrar apenas dados do mês atual
+  const now = new Date();
+  const anoMes = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const dadosMes = dados.filter(d => d.data && d.data.startsWith(anoMes));
   
   if(!dadosMes.length) {
     // Se não dados no mês, limpar campos
