@@ -1041,12 +1041,12 @@ body.light .mini-sel{color-scheme:light;}
   <div class="modal confirm-modal" style="max-width:360px">
     <div class="modal-handle"></div>
     <button class="modal-close" onclick="fecharConfirm()" aria-label="Fechar" style="top:.6rem;right:.6rem;position:absolute">✕</button>
-    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-icon" id="confirm-icon">🗑️</div>
     <div class="confirm-msg" id="confirm-msg">Remover?</div>
     <div class="confirm-sub" id="confirm-sub">Esta ação não pode ser desfeita.</div>
     <div class="confirm-actions">
       <button class="btn btn-danger-ghost" id="confirm-ok">Sim, remover</button>
-      <button class="btn btn-ghost" onclick="fecharConfirm()">Cancelar</button>
+      <button class="btn btn-ghost" onclick="fecharConfirm(null,true)">Cancelar</button>
     </div>
   </div>
 </div>
@@ -1319,14 +1319,11 @@ function salvarRegistro(){
   if(idxExistente !== -1){
     // Já existe — pergunta se quer atualizar
     const ofertaNome = ofertas.find(o=>o.id==d.ofertaId)?.nome || 'esta oferta';
-    confirmar(
-      `Atualizar registro de hoje?`,
-      `Já existe um lançamento de "${ofertaNome}" em ${d.data.split('-').reverse().join('/')}. Deseja sobrescrever com os novos dados?`,
-      () => {
+    confirmar(`Atualizar registro de hoje?`,`Já existe um lançamento de "${ofertaNome}" em ${d.data.split('-').reverse().join('/')}. Deseja sobrescrever com os novos dados?`,() => {
         dados[idxExistente] = { id: dados[idxExistente].id, ...d };
         dados.sort((a,b)=>a.data.localeCompare(b.data));
         save();renderAll();showToast('Registro atualizado!');limparForm();
-      }
+      }, 'Sim, atualizar', '🔄'
     );
   } else {
     // Novo registro
@@ -1381,12 +1378,26 @@ function confirmarEdicao(){
 }
 
 /* ── CONFIRM ── */
-function confirmar(msg,sub,cb){
-  document.getElementById('confirm-msg').textContent=msg;document.getElementById('confirm-sub').textContent=sub||'Esta ação não pode ser desfeita.';
-  confirmCb=cb;document.getElementById('modal-confirm').classList.add('open');
+function confirmar(msg,sub,cb,btnLabel,icon){
+  document.getElementById('confirm-msg').textContent=msg;
+  document.getElementById('confirm-sub').textContent=sub||'Esta ação não pode ser desfeita.';
+  document.getElementById('confirm-ok').textContent=btnLabel||'Sim, remover';
+  const ic=document.getElementById('confirm-icon'); if(ic) ic.textContent=icon||'🗑️';
+  confirmCb=cb;
+  document.getElementById('modal-confirm').classList.add('open');
 }
-function fecharConfirm(e){if(e&&e.target!==document.getElementById('modal-confirm'))return;document.getElementById('modal-confirm').classList.remove('open');confirmCb=null;}
-document.getElementById('confirm-ok').addEventListener('click',()=>{if(confirmCb)confirmCb();document.getElementById('modal-confirm').classList.remove('open');confirmCb=null;});
+function fecharConfirm(e, force){
+  if(!force && e && e.target!==document.getElementById('modal-confirm')) return;
+  document.getElementById('modal-confirm').classList.remove('open');
+  confirmCb=null;
+}
+document.getElementById('confirm-ok').addEventListener('click',()=>{
+  const cb = confirmCb;
+  // Fecha o modal PRIMEIRO, depois executa o callback
+  document.getElementById('modal-confirm').classList.remove('open');
+  confirmCb=null;
+  if(cb) cb();
+});
 
 /* ── IA ── */
 async function analisarIA(tipo){
@@ -2301,14 +2312,11 @@ async function salvarQuickRegistro(){
   const idxExistente = dados.findIndex(r => r.data === data && r.ofertaId === ofertaId);
   if(idxExistente !== -1){
     const nomeOferta = ofertas.find(o=>o.id==ofertaId)?.nome || 'esta oferta';
-    confirmar(
-      `Atualizar registro de hoje?`,
-      `Já existe um lançamento de "${nomeOferta}" em ${data.split('-').reverse().join('/')}. Deseja sobrescrever?`,
-      () => {
+    confirmar(`Atualizar registro de hoje?`,`Já existe um lançamento de "${nomeOferta}" em ${data.split('-').reverse().join('/')}. Deseja sobrescrever?`,() => {
         dados[idxExistente] = { id: dados[idxExistente].id, ...registro };
         dados.sort((a,b)=>a.data.localeCompare(b.data));
         save();renderAll();fecharQuickForm();showToast('✓ Registro atualizado!');
-      }
+      }, 'Sim, atualizar', '🔄'
     );
   } else {
     dados.push({ id: Date.now(), ...registro });
