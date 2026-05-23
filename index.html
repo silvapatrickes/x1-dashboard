@@ -1317,10 +1317,39 @@ function salvarRegistro(){
   const idxExistente = dados.findIndex(r => r.data === d.data && r.ofertaId === d.ofertaId);
 
   if(idxExistente !== -1){
-    // Já existe — pergunta se quer atualizar
+    // Já existe — faz merge só com os campos preenchidos pelo usuário
     const ofertaNome = ofertas.find(o=>o.id==d.ofertaId)?.nome || 'esta oferta';
-    confirmar(`Atualizar registro de hoje?`,`Já existe um lançamento de "${ofertaNome}" em ${d.data.split('-').reverse().join('/')}. Deseja sobrescrever com os novos dados?`,() => {
-        dados[idxExistente] = { id: dados[idxExistente].id, ...d };
+    confirmar(`Atualizar registro?`,`Já existe um lançamento de "${ofertaNome}" em ${d.data.split('-').reverse().join('/')}. Somente os campos preenchidos agora serão atualizados.`,() => {
+        const atual = dados[idxExistente];
+        const p = 'f-';
+        // Lê cada campo bruto do formulário — só aplica se o usuário digitou algo
+        const raw = id => document.getElementById(p+id)?.value?.trim();
+        const merge = {};
+        if(raw('dolar'))        merge.dolar       = parseFloat(raw('dolar'))||atual.dolar;
+        if(raw('iof'))          merge.iof         = parseFloat(raw('iof'))||atual.iof;
+        if(raw('gastos-usd'))   merge.gastosUSD   = parseFloat(raw('gastos-usd'))||atual.gastosUSD;
+        if(raw('gastos-brl'))   merge.gastosBRL   = parseFloat(raw('gastos-brl'))||atual.gastosBRL;
+        if(raw('iof-brl'))      merge.iofBRL      = parseFloat(raw('iof-brl'))||atual.iofBRL;
+        if(raw('cashback'))     merge.cashbackPct = parseFloat(raw('cashback'))||atual.cashbackPct;
+        if(raw('cashback-brl')) merge.cashbackBRL = parseFloat(raw('cashback-brl'))||atual.cashbackBRL;
+        if(raw('receita'))      merge.receita     = parseFloat(raw('receita'))||atual.receita;
+        if(raw('adicional'))    merge.adicional   = parseFloat(raw('adicional'))||atual.adicional;
+        if(raw('vendas'))       merge.vendas      = parseInt(raw('vendas'))||atual.vendas;
+        if(raw('lucro'))        merge.lucro       = parseFloat(raw('lucro'))||atual.lucro;
+        if(raw('margem'))       merge.margem      = parseFloat(raw('margem'))||atual.margem;
+        if(raw('roi'))          merge.roi         = parseFloat(raw('roi'))||atual.roi;
+        if(raw('ticket'))       merge.ticket      = parseFloat(raw('ticket'))||atual.ticket;
+        if(raw('nota'))         merge.nota        = raw('nota');
+        // Recalcula lucro automaticamente se receita ou gastos mudaram mas lucro não foi digitado
+        if((merge.receita!==undefined || merge.gastosBRL!==undefined) && raw('lucro')===''){
+          const r = merge.receita   ?? atual.receita;
+          const g = merge.gastosBRL ?? atual.gastosBRL;
+          merge.lucro   = r - g;
+          merge.margem  = r > 0 ? ((r-g)/r)*100 : atual.margem;
+          merge.roi     = g > 0 ? r/g : atual.roi;
+          merge.ticket  = (merge.vendas??atual.vendas) > 0 ? r/(merge.vendas??atual.vendas) : atual.ticket;
+        }
+        dados[idxExistente] = { ...atual, ...merge };
         dados.sort((a,b)=>a.data.localeCompare(b.data));
         save();renderAll();showToast('Registro atualizado!');limparForm();
       }, 'Sim, atualizar', '🔄'
@@ -2312,8 +2341,30 @@ async function salvarQuickRegistro(){
   const idxExistente = dados.findIndex(r => r.data === data && r.ofertaId === ofertaId);
   if(idxExistente !== -1){
     const nomeOferta = ofertas.find(o=>o.id==ofertaId)?.nome || 'esta oferta';
-    confirmar(`Atualizar registro de hoje?`,`Já existe um lançamento de "${nomeOferta}" em ${data.split('-').reverse().join('/')}. Deseja sobrescrever?`,() => {
-        dados[idxExistente] = { id: dados[idxExistente].id, ...registro };
+    confirmar(`Atualizar registro?`,`Já existe um lançamento de "${nomeOferta}" em ${data.split('-').reverse().join('/')}. Somente os campos preenchidos agora serão atualizados.`,() => {
+        const atual = dados[idxExistente];
+        const raw = id => document.getElementById('qf-'+id)?.value?.trim();
+        const merge = {};
+        if(raw('dolar'))      merge.dolar      = parseFloat(raw('dolar'))     || atual.dolar;
+        if(raw('gastos-usd')) merge.gastosUSD  = parseFloat(raw('gastos-usd'))|| atual.gastosUSD;
+        if(raw('receita'))    merge.receita    = parseFloat(raw('receita'))   || atual.receita;
+        if(raw('vendas'))     merge.vendas     = parseInt(raw('vendas'))      || atual.vendas;
+        if(raw('iof'))        merge.iof        = parseFloat(raw('iof'))       || atual.iof;
+        // Recalcula derivados se qualquer campo-base mudou
+        const r  = merge.receita    ?? atual.receita;
+        const gu = merge.gastosUSD  ?? atual.gastosUSD;
+        const dl = merge.dolar      ?? atual.dolar;
+        const io = merge.iof        ?? atual.iof;
+        const gb = gu * dl * (1 + io/100);
+        const lc = r - gb;
+        const vd = merge.vendas ?? atual.vendas;
+        merge.gastosBRL = gb;
+        merge.iofBRL    = gu * dl * (io/100);
+        merge.lucro     = lc;
+        merge.margem    = r > 0 ? (lc/r)*100 : atual.margem;
+        merge.roi       = gb > 0 ? r/gb : atual.roi;
+        merge.ticket    = vd > 0 ? r/vd : atual.ticket;
+        dados[idxExistente] = { ...atual, ...merge };
         dados.sort((a,b)=>a.data.localeCompare(b.data));
         save();renderAll();fecharQuickForm();showToast('✓ Registro atualizado!');
       }, 'Sim, atualizar', '🔄'
