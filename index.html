@@ -1041,12 +1041,12 @@ body.light .mini-sel{color-scheme:light;}
   <div class="modal confirm-modal" style="max-width:360px">
     <div class="modal-handle"></div>
     <button class="modal-close" onclick="fecharConfirm()" aria-label="Fechar" style="top:.6rem;right:.6rem;position:absolute">✕</button>
-    <div class="confirm-icon" id="confirm-icon">🗑️</div>
+    <div class="confirm-icon">🗑️</div>
     <div class="confirm-msg" id="confirm-msg">Remover?</div>
     <div class="confirm-sub" id="confirm-sub">Esta ação não pode ser desfeita.</div>
     <div class="confirm-actions">
       <button class="btn btn-danger-ghost" id="confirm-ok">Sim, remover</button>
-      <button class="btn btn-ghost" onclick="fecharConfirm(null,true)">Cancelar</button>
+      <button class="btn btn-ghost" onclick="fecharConfirm()">Cancelar</button>
     </div>
   </div>
 </div>
@@ -1312,54 +1312,8 @@ function lerCampos(p='f-'){
 }
 function salvarRegistro(){
   const d=lerCampos('f-');if(!d.data){showToast('Informe a data!');return;}
-
-  // Verifica se já existe registro com mesma data + mesma oferta
-  const idxExistente = dados.findIndex(r => r.data === d.data && r.ofertaId === d.ofertaId);
-
-  if(idxExistente !== -1){
-    // Já existe — faz merge só com os campos preenchidos pelo usuário
-    const ofertaNome = ofertas.find(o=>o.id==d.ofertaId)?.nome || 'esta oferta';
-    confirmar(`Atualizar registro?`,`Já existe um lançamento de "${ofertaNome}" em ${d.data.split('-').reverse().join('/')}. Somente os campos preenchidos agora serão atualizados.`,() => {
-        const atual = dados[idxExistente];
-        const p = 'f-';
-        // Lê cada campo bruto do formulário — só aplica se o usuário digitou algo
-        const raw = id => document.getElementById(p+id)?.value?.trim();
-        const merge = {};
-        if(raw('dolar'))        merge.dolar       = parseFloat(raw('dolar'))||atual.dolar;
-        if(raw('iof'))          merge.iof         = parseFloat(raw('iof'))||atual.iof;
-        if(raw('gastos-usd'))   merge.gastosUSD   = parseFloat(raw('gastos-usd'))||atual.gastosUSD;
-        if(raw('gastos-brl'))   merge.gastosBRL   = parseFloat(raw('gastos-brl'))||atual.gastosBRL;
-        if(raw('iof-brl'))      merge.iofBRL      = parseFloat(raw('iof-brl'))||atual.iofBRL;
-        if(raw('cashback'))     merge.cashbackPct = parseFloat(raw('cashback'))||atual.cashbackPct;
-        if(raw('cashback-brl')) merge.cashbackBRL = parseFloat(raw('cashback-brl'))||atual.cashbackBRL;
-        if(raw('receita'))      merge.receita     = parseFloat(raw('receita'))||atual.receita;
-        if(raw('adicional'))    merge.adicional   = parseFloat(raw('adicional'))||atual.adicional;
-        if(raw('vendas'))       merge.vendas      = parseInt(raw('vendas'))||atual.vendas;
-        if(raw('lucro'))        merge.lucro       = parseFloat(raw('lucro'))||atual.lucro;
-        if(raw('margem'))       merge.margem      = parseFloat(raw('margem'))||atual.margem;
-        if(raw('roi'))          merge.roi         = parseFloat(raw('roi'))||atual.roi;
-        if(raw('ticket'))       merge.ticket      = parseFloat(raw('ticket'))||atual.ticket;
-        if(raw('nota'))         merge.nota        = raw('nota');
-        // Recalcula lucro automaticamente se receita ou gastos mudaram mas lucro não foi digitado
-        if((merge.receita!==undefined || merge.gastosBRL!==undefined) && raw('lucro')===''){
-          const r = merge.receita   ?? atual.receita;
-          const g = merge.gastosBRL ?? atual.gastosBRL;
-          merge.lucro   = r - g;
-          merge.margem  = r > 0 ? ((r-g)/r)*100 : atual.margem;
-          merge.roi     = g > 0 ? r/g : atual.roi;
-          merge.ticket  = (merge.vendas??atual.vendas) > 0 ? r/(merge.vendas??atual.vendas) : atual.ticket;
-        }
-        dados[idxExistente] = { ...atual, ...merge };
-        dados.sort((a,b)=>a.data.localeCompare(b.data));
-        save();renderAll();showToast('Registro atualizado!');limparForm();
-      }, 'Sim, atualizar', '🔄'
-    );
-  } else {
-    // Novo registro
-    dados.push({id:Date.now(),...d});
-    dados.sort((a,b)=>a.data.localeCompare(b.data));
-    save();renderAll();showToast('Registro salvo!');limparForm();
-  }
+  dados.push({id:Date.now(),...d});dados.sort((a,b)=>a.data.localeCompare(b.data));
+  save();renderAll();showToast('Registro salvo!');limparForm();
 }
 function limparForm(){
   ['f-dolar','f-gastos-usd','f-gastos-brl','f-iof-brl','f-cashback','f-cashback-brl','f-receita','f-adicional','f-vendas','f-lucro','f-margem','f-roi','f-ticket','f-nota'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='';}});
@@ -1407,26 +1361,12 @@ function confirmarEdicao(){
 }
 
 /* ── CONFIRM ── */
-function confirmar(msg,sub,cb,btnLabel,icon){
-  document.getElementById('confirm-msg').textContent=msg;
-  document.getElementById('confirm-sub').textContent=sub||'Esta ação não pode ser desfeita.';
-  document.getElementById('confirm-ok').textContent=btnLabel||'Sim, remover';
-  const ic=document.getElementById('confirm-icon'); if(ic) ic.textContent=icon||'🗑️';
-  confirmCb=cb;
-  document.getElementById('modal-confirm').classList.add('open');
+function confirmar(msg,sub,cb){
+  document.getElementById('confirm-msg').textContent=msg;document.getElementById('confirm-sub').textContent=sub||'Esta ação não pode ser desfeita.';
+  confirmCb=cb;document.getElementById('modal-confirm').classList.add('open');
 }
-function fecharConfirm(e, force){
-  if(!force && e && e.target!==document.getElementById('modal-confirm')) return;
-  document.getElementById('modal-confirm').classList.remove('open');
-  confirmCb=null;
-}
-document.getElementById('confirm-ok').addEventListener('click',()=>{
-  const cb = confirmCb;
-  // Fecha o modal PRIMEIRO, depois executa o callback
-  document.getElementById('modal-confirm').classList.remove('open');
-  confirmCb=null;
-  if(cb) cb();
-});
+function fecharConfirm(e){if(e&&e.target!==document.getElementById('modal-confirm'))return;document.getElementById('modal-confirm').classList.remove('open');confirmCb=null;}
+document.getElementById('confirm-ok').addEventListener('click',()=>{if(confirmCb)confirmCb();document.getElementById('modal-confirm').classList.remove('open');confirmCb=null;});
 
 /* ── IA ── */
 async function analisarIA(tipo){
@@ -2336,44 +2276,9 @@ async function salvarQuickRegistro(){
   const ticket = vendas > 0 ? receita/vendas : null;
   const ofertaNome = ofertaId ? (ofertas.find(o=>o.id===ofertaId)||{}).nome : null;
   const registro = { data, ofertaId, ofertaNome, dolar, gastosUSD, gastosBRL, iof, iofBRL, receita, lucro, margem, roi, vendas, ticket, cashback:0, cashbackBRL:0, adicional:0, tags:[], obs:'' };
-
-  // Verifica duplicata (mesma data + mesma oferta)
-  const idxExistente = dados.findIndex(r => r.data === data && r.ofertaId === ofertaId);
-  if(idxExistente !== -1){
-    const nomeOferta = ofertas.find(o=>o.id==ofertaId)?.nome || 'esta oferta';
-    confirmar(`Atualizar registro?`,`Já existe um lançamento de "${nomeOferta}" em ${data.split('-').reverse().join('/')}. Somente os campos preenchidos agora serão atualizados.`,() => {
-        const atual = dados[idxExistente];
-        const raw = id => document.getElementById('qf-'+id)?.value?.trim();
-        const merge = {};
-        if(raw('dolar'))      merge.dolar      = parseFloat(raw('dolar'))     || atual.dolar;
-        if(raw('gastos-usd')) merge.gastosUSD  = parseFloat(raw('gastos-usd'))|| atual.gastosUSD;
-        if(raw('receita'))    merge.receita    = parseFloat(raw('receita'))   || atual.receita;
-        if(raw('vendas'))     merge.vendas     = parseInt(raw('vendas'))      || atual.vendas;
-        if(raw('iof'))        merge.iof        = parseFloat(raw('iof'))       || atual.iof;
-        // Recalcula derivados se qualquer campo-base mudou
-        const r  = merge.receita    ?? atual.receita;
-        const gu = merge.gastosUSD  ?? atual.gastosUSD;
-        const dl = merge.dolar      ?? atual.dolar;
-        const io = merge.iof        ?? atual.iof;
-        const gb = gu * dl * (1 + io/100);
-        const lc = r - gb;
-        const vd = merge.vendas ?? atual.vendas;
-        merge.gastosBRL = gb;
-        merge.iofBRL    = gu * dl * (io/100);
-        merge.lucro     = lc;
-        merge.margem    = r > 0 ? (lc/r)*100 : atual.margem;
-        merge.roi       = gb > 0 ? r/gb : atual.roi;
-        merge.ticket    = vd > 0 ? r/vd : atual.ticket;
-        dados[idxExistente] = { ...atual, ...merge };
-        dados.sort((a,b)=>a.data.localeCompare(b.data));
-        save();renderAll();fecharQuickForm();showToast('✓ Registro atualizado!');
-      }, 'Sim, atualizar', '🔄'
-    );
-  } else {
-    dados.push({ id: Date.now(), ...registro });
-    dados.sort((a,b)=>a.data.localeCompare(b.data));
-    save();renderAll();fecharQuickForm();showToast('✓ Registro salvo!');
-  }
+  const ok = await salvarRegistro(registro);
+  if(ok){ fecharQuickForm(); showToast('✓ Registro salvo!','success'); }
+  else showToast('Erro ao salvar','error');
 }
 
 /* ── HOJE HERO CARD ── */
@@ -2639,27 +2544,13 @@ function iniciarSwipe(){
 
 /* ── EXPORTAR BACKUP COMPLETO ── */
 function exportarBackup(){
-  const perfil = {
-    nome:  localStorage.getItem('x1_nome')  || '',
-    email: localStorage.getItem('x1_email') || '',
-  };
-  const backup = {
-    versao: 3,
-    exportadoEm: new Date().toISOString(),
-    dados,
-    ofertas,
-    despesas,
-    tags,
-    metas,
-    perfil,
-  };
+  const backup = { versao:2, exportadoEm: new Date().toISOString(), dados, ofertas, despesas, tags, metas };
   const json = JSON.stringify(backup, null, 2);
   const blob = new Blob([json], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url; a.download=`x1-backup-${hoje}.json`; a.click();
   URL.revokeObjectURL(url);
-  const total = dados.length;
-  showToast(`✓ Backup completo! ${total} registros, ${ofertas.length} ofertas, ${despesas.length} despesas.`,'success');
+  showToast('✓ Backup exportado!','success');
 }
 
 /* ── EXPORTAR LOCALSTORAGE (sistema antigo) ── */
@@ -2695,77 +2586,18 @@ async function importarBackup(input){
   try{
     const text = await file.text();
     const backup = JSON.parse(text);
-
-    // ── DADOS ──
     const dadosImport = backup.dados || backup.registros || [];
-    if(dadosImport.length){
-      // Merge: mantém existentes, adiciona novos por ID
-      const idsExistentes = new Set(dados.map(d=>d.id));
-      dadosImport.forEach(d => {
-        if(idsExistentes.has(d.id)){
-          // Atualiza existente
-          const idx = dados.findIndex(r=>r.id===d.id);
-          if(idx!==-1) dados[idx] = d;
-        } else {
-          dados.push({...d, id: d.id || Date.now() + Math.random()});
-        }
-      });
-      dados.sort((a,b) => a.data.localeCompare(b.data));
-      save();
-    }
-
-    // ── OFERTAS ──
-    if(backup.ofertas?.length){
-      const idsOf = new Set(ofertas.map(o=>o.id));
-      backup.ofertas.forEach(o => { if(!idsOf.has(o.id)) ofertas.push(o); });
-      localStorage.setItem('x1_ofertas', JSON.stringify(ofertas));
-    }
-
-    // ── DESPESAS ──
-    if(backup.despesas?.length){
-      const idsDe = new Set(despesas.map(d=>d.id));
-      backup.despesas.forEach(d => { if(!idsDe.has(d.id)) despesas.push(d); });
-      localStorage.setItem('x1_despesas', JSON.stringify(despesas));
-    }
-
-    // ── TAGS ──
-    if(backup.tags?.length){
-      const idsTg = new Set(tags.map(t=>t.id));
-      backup.tags.forEach(t => { if(!idsTg.has(t.id)) tags.push(t); });
-      localStorage.setItem('x1_tags', JSON.stringify(tags));
-    }
-
-    // ── METAS ──
-    if(backup.metas && Object.keys(backup.metas).length){
-      metas = { ...backup.metas };
-      localStorage.setItem('x1_metas', JSON.stringify(metas));
-      // Preenche input de meta mensal se existir
-      const metaEl = document.getElementById('meta-mensal');
-      if(metaEl && metas.mensal) metaEl.value = metas.mensal;
-      const metaEl2 = document.getElementById('meta-mensal2');
-      if(metaEl2 && metas.mensal) metaEl2.value = metas.mensal;
-    }
-
-    // ── PERFIL ──
-    if(backup.perfil){
-      if(backup.perfil.nome)  localStorage.setItem('x1_nome',  backup.perfil.nome);
-      if(backup.perfil.email) localStorage.setItem('x1_email', backup.perfil.email);
-    }
-
+    if(!dadosImport.length){ status.textContent='⚠ Nenhum registro encontrado.'; return; }
+    status.textContent = `⏳ Importando ${dadosImport.length} registros...`;
+    dadosImport.forEach(d => {
+      dados.push({...d, id: d.id || Date.now() + Math.random()});
+    });
+    dados.sort((a,b) => a.data.localeCompare(b.data));
+    save();
+    status.textContent = `✅ ${dadosImport.length} registros importados!`;
+    showToast(`✓ ${dadosImport.length} registros importados!`,'success');
     renderAll();
-    atualizarSelects();
-
-    const resumo = [
-      `${dadosImport.length} registros`,
-      backup.ofertas?.length ? `${backup.ofertas.length} ofertas` : '',
-      backup.despesas?.length ? `${backup.despesas.length} despesas` : '',
-      backup.tags?.length ? `${backup.tags.length} tags` : '',
-      backup.metas && Object.keys(backup.metas).length ? 'metas' : '',
-    ].filter(Boolean).join(', ');
-
-    status.textContent = `✅ Importado com sucesso: ${resumo}`;
-    showToast(`✓ Backup restaurado!`,'success');
-  } catch(e){ status.textContent='❌ Erro ao importar: '+e.message; console.error(e); }
+  } catch(e){ status.textContent='❌ Erro: '+e.message; }
   input.value='';
 }
 
