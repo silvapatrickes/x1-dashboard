@@ -512,6 +512,35 @@ body.light .mini-sel{color-scheme:light;}
 #supa-status{font-size:.7rem;margin-top:.45rem;text-align:center;}
 .logout-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.68rem;font-family:'Inter',sans-serif;}
 .logout-btn:hover{color:var(--red);}
+
+/* ── FILTRO RESUMO (período + oferta) ── */
+/* Valores dos 6 cards do resumo: mesma cor do label, sem negrito */
+#resumo-6cards .kpi-value,
+#resumo-6cards .kpi-value.pos,
+#resumo-6cards .kpi-value.neg {
+  color: var(--muted) !important;
+  font-weight: 400 !important;
+}
+.resumo-filtro-bar{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem;align-items:flex-end;}
+.resumo-filtro-item{display:flex;flex-direction:column;gap:.25rem;}
+.resumo-filtro-label{font-size:.6rem;font-weight:500;color:var(--muted2);text-transform:uppercase;letter-spacing:.05em;}
+.resumo-filtro-sel{
+  background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
+  padding:.45rem .75rem;color:var(--text);font-family:'Inter',sans-serif;font-size:.76rem;
+  outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238892a4'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .6rem center;padding-right:1.8rem;
+  min-width:140px;
+}
+.resumo-filtro-sel:focus{border-color:var(--accent);}
+.resumo-filtro-date-wrap{display:flex;gap:.35rem;align-items:center;}
+.resumo-filtro-date{
+  background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
+  padding:.45rem .65rem;color:var(--text);font-family:'Inter',sans-serif;font-size:.76rem;
+  outline:none;color-scheme:dark;width:130px;
+}
+.resumo-filtro-date:focus{border-color:var(--accent);}
+.resumo-filtro-sep{font-size:.7rem;color:var(--muted2);}
 </style>
 </head>
 <body>
@@ -592,6 +621,36 @@ body.light .mini-sel{color-scheme:light;}
         <div class="meta-wrap"><span class="meta-label">Meta mês</span><input class="meta-input" type="number" id="meta-mensal" placeholder="Ex: 10000" oninput="salvarMeta();renderKPIs();"></div>
       </div>
     </div>
+    <!-- FILTRO PERÍODO + OFERTA -->
+    <div class="resumo-filtro-bar" id="resumo-filtro-bar">
+      <div class="resumo-filtro-item">
+        <span class="resumo-filtro-label">Período de Visualização</span>
+        <select class="resumo-filtro-sel" id="resumo-periodo-sel" onchange="aplicarFiltroResumo()">
+          <option value="mes_atual">Esse mês</option>
+          <option value="hoje">Hoje</option>
+          <option value="ontem">Ontem</option>
+          <option value="7dias">Últimos 7 dias</option>
+          <option value="mes_passado">Mês passado</option>
+          <option value="maximo">Máximo</option>
+          <option value="personalizado">Personalizado</option>
+        </select>
+      </div>
+      <div class="resumo-filtro-item" id="resumo-datas-wrap" style="display:none;">
+        <span class="resumo-filtro-label">Intervalo</span>
+        <div class="resumo-filtro-date-wrap">
+          <input type="date" class="resumo-filtro-date" id="resumo-de" onchange="aplicarFiltroResumo()" />
+          <span class="resumo-filtro-sep">—</span>
+          <input type="date" class="resumo-filtro-date" id="resumo-ate" onchange="aplicarFiltroResumo()" />
+        </div>
+      </div>
+      <div class="resumo-filtro-item">
+        <span class="resumo-filtro-label">Oferta</span>
+        <select class="resumo-filtro-sel" id="resumo-oferta-sel" onchange="aplicarFiltroResumo()">
+          <option value="">Qualquer</option>
+        </select>
+      </div>
+    </div>
+
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.75rem;" id="resumo-6cards">
       <div class="kpi"><div class="kpi-label">💰 Lucro Líquido</div><div class="kpi-value" id="r6-lucro">R$ 0,00</div></div>
       <div class="kpi"><div class="kpi-label">📈 Receita</div><div class="kpi-value" id="r6-receita">R$ 0,00</div></div>
@@ -1563,6 +1622,8 @@ function atualizarSelects(){
   
   // Popular filtro de meses no Histórico
   popularFiltroMeses();
+  // Popular oferta no filtro do resumo
+  popularOfertasResumoFiltro();
 }
 
 function popularFiltroMeses(){
@@ -2387,6 +2448,77 @@ function atualizarKPIHighlights(){
   set('r6-vendas', tV.toString());
   set('r6-ticket', aT !== null ? fmtBRL(aT) : '—');
 }
+
+/* ── FILTRO RESUMO ── */
+function aplicarFiltroResumo(){
+  const periodo = document.getElementById('resumo-periodo-sel').value;
+  const ofertaId = document.getElementById('resumo-oferta-sel').value;
+  const datasWrap = document.getElementById('resumo-datas-wrap');
+  const now = new Date();
+  const localD = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+  let de = null, ate = null;
+
+  if(periodo === 'personalizado'){
+    datasWrap.style.display = '';
+    de = document.getElementById('resumo-de').value;
+    ate = document.getElementById('resumo-ate').value;
+    if(!de || !ate) return;
+  } else {
+    datasWrap.style.display = 'none';
+    if(periodo === 'hoje'){
+      de = ate = localD(now);
+    } else if(periodo === 'ontem'){
+      const d = new Date(now); d.setDate(d.getDate()-1);
+      de = ate = localD(d);
+    } else if(periodo === '7dias'){
+      const d = new Date(now); d.setDate(d.getDate()-6);
+      de = localD(d); ate = localD(now);
+    } else if(periodo === 'mes_atual'){
+      de = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+      ate = localD(now);
+    } else if(periodo === 'mes_passado'){
+      const p = new Date(now.getFullYear(), now.getMonth()-1, 1);
+      const fim = new Date(now.getFullYear(), now.getMonth(), 0);
+      de = localD(p); ate = localD(fim);
+    } else if(periodo === 'maximo'){
+      de = null; ate = null;
+    }
+  }
+
+  let lista = dados;
+  if(de) lista = lista.filter(d => d.data >= de);
+  if(ate) lista = lista.filter(d => d.data <= ate);
+  if(ofertaId) lista = lista.filter(d => String(d.ofertaId) === ofertaId);
+
+  const tL = lista.reduce((s,d)=>s+(d.lucro||0),0);
+  const tR = lista.reduce((s,d)=>s+(d.receita||0),0);
+  const tG = lista.reduce((s,d)=>s+(d.gastosBRL||0),0);
+  const tV = lista.reduce((s,d)=>s+(d.vendas||0),0);
+  const aROI = tG > 0 ? tR/tG : null;
+  const aT = tV > 0 ? tR/tV : null;
+
+  const set = (id, val, cls) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.textContent = val;
+    el.className = 'kpi-value' + (cls ? ' '+cls : '');
+  };
+
+  set('r6-lucro', fmtBRL(tL), tL>=0?'pos':'neg');
+  set('r6-receita', fmtBRL(tR));
+  set('r6-roi', aROI !== null ? aROI.toFixed(2) : '—', aROI>=1?'pos':aROI!==null?'neg':'');
+  set('r6-gastos', fmtBRL(tG));
+  set('r6-vendas', tV.toString());
+  set('r6-ticket', aT !== null ? fmtBRL(aT) : '—');
+}
+
+function popularOfertasResumoFiltro(){
+  const sel = document.getElementById('resumo-oferta-sel');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">Qualquer</option>' + ofertas.map(o=>`<option value="${o.id}">${o.nome}</option>`).join('');
+}
+
 
 /* ── EXPORT CSV ── */
 function exportarCSV(){
