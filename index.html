@@ -1041,144 +1041,110 @@ body.light .mini-sel{color-scheme:light;}
 <div class="view" id="tab-numeros">
 
 <style>
-.wa-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;}
-.wa-brand{display:flex;align-items:center;gap:.6rem;}
-.wa-brand-icon{width:32px;height:32px;border-radius:8px;background:#25D366;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0;}
-.wa-brand-name{font-size:.95rem;font-weight:700;letter-spacing:-.02em;}
-.wa-brand-sub{font-size:.6rem;color:var(--muted);margin-top:1px;}
-.wa-btn-add{background:#25D366;color:#fff;border:none;border-radius:8px;padding:.5rem 1rem;font-size:.75rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:.3rem;}
-.wa-btn-add:hover{background:#1ebe5d;}
-.wa-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem;margin-bottom:1rem;}
-.wa-stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.6rem .7rem;display:flex;align-items:center;gap:.5rem;}
-.wa-stat-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
-.wa-icon-ok{background:rgba(34,197,94,.12);color:#22c55e;}
-.wa-icon-rest{background:rgba(245,158,11,.12);color:#f59e0b;}
-.wa-icon-ban{background:rgba(239,68,68,.12);color:#ef4444;}
-.wa-icon-disc{background:rgba(100,116,139,.12);color:#64748b;}
-.wa-stat-val{font-size:1.1rem;font-weight:700;line-height:1.1;}
-.wa-stat-lbl{font-size:.58rem;color:var(--muted);margin-top:1px;}
-.wa-toolbar{display:flex;gap:.4rem;margin-bottom:.75rem;flex-wrap:wrap;align-items:center;}
-.wa-search{position:relative;flex:1;min-width:140px;max-width:220px;}
-.wa-search-ic{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:.8rem;color:var(--muted2);}
-.wa-search input{width:100%;padding:.38rem .7rem .38rem 26px;font-size:.75rem;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:'Inter',sans-serif;outline:none;}
-.wa-filter{font-size:.75rem;padding:.38rem .65rem;border-radius:7px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:'Inter',sans-serif;outline:none;cursor:pointer;}
-.wa-cards{display:flex;flex-direction:column;gap:.5rem;}
-.wa-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.75rem .85rem;display:grid;grid-template-columns:auto 1fr auto;gap:0 .75rem;align-items:center;transition:border-color .15s;}
-.wa-card:hover{border-color:var(--border2);}
-.wa-card.card-rest{border-left:3px solid #f59e0b;border-radius:0 10px 10px 0;}
-.wa-card.card-ban{border-left:3px solid #ef4444;border-radius:0 10px 10px 0;}
-.wa-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
-.av-ok{background:rgba(34,197,94,.15);color:#22c55e;}
-.av-rest{background:rgba(245,158,11,.15);color:#f59e0b;}
-.av-ban{background:rgba(239,68,68,.15);color:#ef4444;}
-.av-disc{background:rgba(100,116,139,.15);color:#64748b;}
-.wa-body{min-width:0;}
-.wa-nick{font-weight:600;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.wa-num{font-size:.65rem;color:var(--muted);margin-top:2px;}
-.wa-meta{display:flex;align-items:center;gap:.4rem;margin-top:.35rem;flex-wrap:wrap;}
-.wa-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:999px;font-size:.6rem;font-weight:600;white-space:nowrap;}
-.wb-ok{background:rgba(34,197,94,.12);color:#22c55e;}
-.wb-rest{background:rgba(245,158,11,.12);color:#f59e0b;}
-.wb-ban{background:rgba(239,68,68,.12);color:#ef4444;}
-.wb-disc{background:rgba(100,116,139,.12);color:#64748b;}
-.wa-dot{width:5px;height:5px;border-radius:50%;display:inline-block;}
-.wd-ok{background:#22c55e;}
-.wd-rest{background:#f59e0b;}
-.wd-ban{background:#ef4444;}
-.wd-disc{background:#64748b;}
-.wa-plat{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:999px;font-size:.6rem;border:1px solid var(--border2);color:var(--muted);}
-.wa-rest-cnt{font-size:.6rem;color:var(--muted2);}
-.wa-obs{font-size:.6rem;color:var(--muted2);font-style:italic;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.wa-right{display:flex;flex-direction:column;align-items:flex-end;gap:.4rem;flex-shrink:0;}
-.wa-timer{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:999px;font-size:.65rem;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
-.wt-active{background:rgba(245,158,11,.12);color:#f59e0b;}
-.wt-done{background:rgba(34,197,94,.12);color:#22c55e;}
-.wt-none{font-size:.63rem;color:var(--muted2);}
-.wa-prog{width:80px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden;}
-.wa-prog-fill{height:100%;border-radius:2px;background:#f59e0b;transition:width 1s linear;}
-.wa-actions{display:flex;gap:2px;}
-.wa-act{background:none;border:none;cursor:pointer;width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:.78rem;color:var(--muted);transition:all .13s;}
-.wa-act:hover{background:var(--surface2);color:var(--text);}
-.wa-empty{text-align:center;padding:2rem 1rem;color:var(--muted);}
+.wa-header-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;flex-wrap:wrap;gap:.5rem;}
+.wa-kpi-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem;margin-bottom:.75rem;}
+.wa-kpi{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.65rem .7rem;}
+.wa-kpi-label{font-size:.62rem;font-weight:500;color:var(--muted);margin-bottom:.2rem;}
+.wa-kpi-value{font-size:.92rem;font-weight:700;letter-spacing:-.02em;}
+.wa-kpi-value.ok{color:var(--green);}
+.wa-kpi-value.rest{color:var(--yellow);}
+.wa-kpi-value.ban{color:var(--red);}
+.wa-kpi-value.disc{color:var(--muted);}
+/* reg-cards mobile — mesmo padrão do histórico */
+.wa-reg-list{display:flex;flex-direction:column;gap:.5rem;}
+.wa-reg-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.85rem;}
+.wa-reg-card.bord-rest{border-left:3px solid var(--yellow);}
+.wa-reg-card.bord-ban{border-left:3px solid var(--red);}
+.wa-reg-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.55rem;}
+.wa-reg-date{font-weight:600;font-size:.82rem;}
+.wa-reg-plat{font-size:.65rem;}
+.wa-reg-body{display:grid;grid-template-columns:1fr 1fr;gap:.35rem .6rem;}
+.wa-reg-row{display:flex;flex-direction:column;gap:.04rem;}
+.wa-reg-row-label{font-size:.6rem;color:var(--muted);}
+.wa-reg-row-value{font-size:.78rem;font-weight:600;}
+.wa-reg-card-footer{display:flex;justify-content:flex-end;gap:.3rem;margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--border);}
+/* badges de status */
+.wa-sbadge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:999px;font-size:.6rem;font-weight:600;}
+.wa-sbadge.ok{background:rgba(34,197,94,.12);color:var(--green);}
+.wa-sbadge.rest{background:rgba(245,158,11,.12);color:var(--yellow);}
+.wa-sbadge.ban{background:rgba(239,68,68,.12);color:var(--red);}
+.wa-sbadge.disc{background:rgba(100,116,139,.12);color:var(--muted);}
+/* timer inline */
+.wa-timer-inline{display:inline-flex;align-items:center;gap:3px;font-size:.65rem;font-weight:600;font-variant-numeric:tabular-nums;}
+.wa-timer-inline.active{color:var(--yellow);}
+.wa-timer-inline.done{color:var(--green);}
+.wa-prog-sm{height:3px;background:var(--border2);border-radius:2px;overflow:hidden;margin-top:3px;}
+.wa-prog-sm-fill{height:100%;border-radius:2px;background:var(--yellow);transition:width 1s linear;}
 /* Modal WA */
-.wa-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;align-items:flex-end;justify-content:center;}
+.wa-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:400;align-items:flex-end;justify-content:center;}
 .wa-overlay.open{display:flex;}
-.wa-modal{background:var(--surface);border-radius:16px 16px 0 0;padding:1.25rem;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding-bottom:calc(1.25rem + var(--safe-bottom));}
+.wa-modal{background:var(--surface);border-radius:16px 16px 0 0;padding:1.25rem;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;padding-bottom:calc(1.25rem + var(--safe-bottom));}
+@media(min-width:768px){.wa-modal{border-radius:14px;align-self:center;max-height:85vh;}}
 .wa-modal-handle{width:36px;height:4px;background:var(--border2);border-radius:999px;margin:0 auto .85rem;}
-.wa-modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
-.wa-modal-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted2);}
-.wa-modal-close{background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted);padding:.2rem .4rem;border-radius:5px;}
+@media(min-width:768px){.wa-modal-handle{display:none;}}
+.wa-modal-title{font-size:.76rem;font-weight:700;color:var(--text);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.95rem;display:flex;align-items:center;justify-content:space-between;}
+.wa-modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:.2rem;line-height:1;border-radius:4px;}
 .wa-modal-close:hover{color:var(--text);}
-.wa-sec-label{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted2);margin-bottom:.6rem;padding-bottom:.3rem;border-bottom:1px solid var(--border);}
-.wa-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-bottom:.75rem;}
-.wa-form-grid-1{display:grid;grid-template-columns:1fr;gap:.55rem;margin-bottom:.75rem;}
+.wa-sec{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted2);margin:.6rem 0 .5rem;padding-bottom:.3rem;border-bottom:1px solid var(--border);}
+.wa-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-bottom:.55rem;}
 .wa-field{display:flex;flex-direction:column;gap:.22rem;}
 .wa-field label{font-size:.65rem;font-weight:500;color:var(--muted);}
-.wa-field input,.wa-field select,.wa-field textarea{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:.55rem .7rem;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;width:100%;-webkit-appearance:none;appearance:none;}
-.wa-field input:focus,.wa-field select:focus{border-color:#f59e0b;}
-.wa-field textarea{resize:none;font-size:.8rem;min-height:60px;}
-.wa-rest-fields{display:none;margin-bottom:.75rem;}
-.wa-modal-actions{display:flex;gap:.4rem;margin-top:1rem;}
-.wa-btn-save{background:#25D366;color:#fff;border:none;border-radius:8px;padding:.58rem 1.1rem;font-size:.78rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
-.wa-btn-cancel{background:transparent;color:var(--muted);border:1px solid var(--border2);border-radius:8px;padding:.58rem 1rem;font-size:.78rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
+.wa-field input,.wa-field select,.wa-field textarea{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:.58rem .75rem;color:var(--text);font-family:'Inter',sans-serif;font-size:16px;outline:none;width:100%;-webkit-appearance:none;appearance:none;}
+.wa-field input:focus,.wa-field select:focus{border-color:var(--yellow);}
+.wa-field textarea{resize:none;font-size:.82rem;min-height:60px;}
+.wa-rest-row{display:none;margin-bottom:.55rem;}
+.wa-modal-actions{display:flex;gap:.45rem;margin-top:1rem;}
 </style>
 
-<div class="wa-topbar">
-  <div class="wa-brand">
-    <div class="wa-brand-icon">📱</div>
-    <div>
-      <div class="wa-brand-name">WA Manager</div>
-      <div class="wa-brand-sub">Controle de números</div>
-    </div>
-  </div>
-  <button class="wa-btn-add" onclick="waOpenModal()">＋ Novo número</button>
+<div class="wa-header-bar">
+  <div style="font-size:.65rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted2);">📱 Números WhatsApp</div>
+  <button class="btn btn-primary btn-sm" onclick="waOpenModal()">＋ Novo número</button>
 </div>
 
-<div class="wa-stats" id="wa-stats"></div>
+<div class="wa-kpi-strip" id="wa-kpi-strip"></div>
 
-<div class="wa-toolbar">
-  <div class="wa-search">
-    <span class="wa-search-ic">🔍</span>
-    <input type="text" id="wa-search" placeholder="Buscar..." oninput="waRender()">
-  </div>
-  <select class="wa-filter" id="wa-fstatus" onchange="waRender()">
-    <option value="">Todos</option>
+<div class="filter-bar">
+  <input type="text" id="wa-search" placeholder="Buscar número ou apelido..." style="font-size:.75rem;flex:1;min-width:120px;max-width:200px;" oninput="waRender()">
+  <select id="wa-fstatus" onchange="waRender()" style="font-size:.75rem;background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:.38rem .65rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;">
+    <option value="">Todos os status</option>
     <option value="ok">Conectado</option>
-    <option value="rest">Restrição</option>
+    <option value="rest">Em restrição</option>
     <option value="ban">Banido</option>
     <option value="disc">Desconectado</option>
   </select>
-  <select class="wa-filter" id="wa-fplat" onchange="waRender()">
-    <option value="">Plataformas</option>
+  <select id="wa-fplat" onchange="waRender()" style="font-size:.75rem;background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:.38rem .65rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;">
+    <option value="">Todas as plataformas</option>
     <option value="uaizap">Uaizap</option>
     <option value="meta">API Meta</option>
     <option value="manual">Manual</option>
     <option value="outro">Outra</option>
   </select>
-  <select class="wa-filter" id="wa-foper" onchange="waRender()">
-    <option value="">Operadoras</option>
+  <select id="wa-foper" onchange="waRender()" style="font-size:.75rem;background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:.38rem .65rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;">
+    <option value="">Todas as operadoras</option>
   </select>
 </div>
 
-<div class="wa-cards" id="wa-cards"></div>
-<div class="wa-empty" id="wa-empty" style="display:none">📭 Nenhum número encontrado.</div>
+<!-- MOBILE: cards -->
+<div class="wa-reg-list" id="wa-reg-list"></div>
+<!-- DESKTOP: tabela -->
+<div class="table-wrap" id="wa-table-wrap"><div class="empty-state"><div class="icon">📱</div>Nenhum número cadastrado.</div></div>
 
 <!-- MODAL -->
 <div class="wa-overlay" id="wa-overlay">
   <div class="wa-modal">
     <div class="wa-modal-handle"></div>
-    <div class="wa-modal-header">
-      <span class="wa-modal-title" id="wa-modal-title">Novo número</span>
+    <div class="wa-modal-title">
+      <span id="wa-modal-title">Novo número</span>
       <button class="wa-modal-close" onclick="waCloseModal()">✕</button>
     </div>
 
-    <div class="wa-sec-label">Identificação</div>
+    <div class="wa-sec">Identificação</div>
     <div class="wa-form-grid">
       <div class="wa-field"><label>Número (com DDD)</label><input id="wf-num" placeholder="41999990000" inputmode="numeric"></div>
       <div class="wa-field"><label>Apelido</label><input id="wf-nick" placeholder="Vendas 1"></div>
       <div class="wa-field"><label>Operadora</label>
         <select id="wf-operadora">
-          <option value="">Selecionar</option>
+          <option value="">—</option>
           <option value="Vivo">Vivo</option>
           <option value="Claro">Claro</option>
           <option value="TIM">TIM</option>
@@ -1196,7 +1162,7 @@ body.light .mini-sel{color-scheme:light;}
       </div>
     </div>
 
-    <div class="wa-sec-label" style="margin-top:.25rem">Status</div>
+    <div class="wa-sec">Status</div>
     <div class="wa-form-grid">
       <div class="wa-field"><label>Status atual</label>
         <select id="wf-status" onchange="waToggleRest()">
@@ -1206,13 +1172,13 @@ body.light .mini-sel{color-scheme:light;}
           <option value="disc">Desconectado</option>
         </select>
       </div>
-      <div class="wa-field"><label>Total de restrições</label><input id="wf-rest-total" type="number" value="0" min="0" inputmode="numeric"></div>
+      <div class="wa-field"><label>Total de restrições recebidas</label><input id="wf-rest-total" type="number" value="0" min="0" inputmode="numeric"></div>
     </div>
 
-    <div class="wa-rest-fields" id="wa-rest-fields">
-      <div class="wa-sec-label">Restrição ativa</div>
+    <div class="wa-rest-row" id="wa-rest-row">
+      <div class="wa-sec">Restrição ativa — timer</div>
       <div class="wa-form-grid">
-        <div class="wa-field"><label>Duração</label>
+        <div class="wa-field"><label>Duração da restrição</label>
           <select id="wf-dur">
             <option value="6">6 horas</option>
             <option value="24">24 horas</option>
@@ -1222,38 +1188,26 @@ body.light .mini-sel{color-scheme:light;}
       </div>
     </div>
 
-    <div class="wa-form-grid-1">
-      <div class="wa-field"><label>Observações</label><textarea id="wf-obs" placeholder="Opcional..."></textarea></div>
-    </div>
+    <div class="wa-field" style="margin-bottom:.55rem"><label>Observações</label><textarea id="wf-obs" placeholder="Opcional..."></textarea></div>
 
     <div class="wa-modal-actions">
-      <button class="wa-btn-save" onclick="waSave()">Salvar</button>
-      <button class="wa-btn-cancel" onclick="waCloseModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="waSave()">Salvar</button>
+      <button class="btn btn-ghost" onclick="waCloseModal()">Cancelar</button>
     </div>
   </div>
 </div>
-</div>
+</div><!-- /tab-numeros -->
 
 <script>
 /* ── WA MANAGER ── */
 let waData = JSON.parse(localStorage.getItem('x1_wa_numeros') || '[]');
-let waNextId = (waData.length ? Math.max(...waData.map(d=>d.id)) + 1 : 1);
+let waNextId = waData.length ? Math.max(...waData.map(d=>d.id))+1 : 1;
 let waEditId = null;
 
-const waSM = {
-  ok:   {lbl:'Conectado',   bcls:'wb-ok',   av:'av-ok',   dot:'wd-ok'},
-  rest: {lbl:'Restrição',   bcls:'wb-rest', av:'av-rest', dot:'wd-rest'},
-  ban:  {lbl:'Banido',      bcls:'wb-ban',  av:'av-ban',  dot:'wd-ban'},
-  disc: {lbl:'Desconectado',bcls:'wb-disc', av:'av-disc', dot:'wd-disc'},
-};
+const waSMLbl = {ok:'Conectado', rest:'Restrição', ban:'Banido', disc:'Desconectado'};
 const waPM = {uaizap:'Uaizap', meta:'API Meta', manual:'Manual', outro:'Outra'};
 
 function waSaveLocal(){ localStorage.setItem('x1_wa_numeros', JSON.stringify(waData)); }
-
-function waInitials(nick, num){
-  if(nick){ const p=nick.trim().split(' '); return p.length>1?(p[0][0]+p[1][0]).toUpperCase():p[0].slice(0,2).toUpperCase(); }
-  return num.slice(-2);
-}
 
 function waFmt(ms){
   if(ms<=0) return null;
@@ -1261,127 +1215,145 @@ function waFmt(ms){
   return (h>0?h+'h ':'')+String(m).padStart(2,'0')+'m '+String(s).padStart(2,'0')+'s';
 }
 
-function waTimerHTML(d){
-  if(d.status!=='rest'||!d.restEnd) return '<span class="wt-none">—</span>';
+function waTimerCell(d, idPrefix){
+  if(d.status!=='rest'||!d.restEnd) return '—';
   const rem = d.restEnd - Date.now();
-  if(rem<=0) return '<span class="wa-timer wt-done">✓ Liberado!</span>';
+  if(rem<=0) return '<span style="color:var(--green);font-size:.65rem;font-weight:600">✓ Liberado</span>';
   const pct = Math.round(Math.max(0,Math.min(100,(rem/d._totalMs)*100)));
-  return `<span class="wa-timer wt-active" id="wcd-${d.id}">⏱ ${waFmt(rem)}</span>
-          <div class="wa-prog"><div class="wa-prog-fill" id="wpb-${d.id}" style="width:${pct}%"></div></div>`;
+  return `<span class="wa-timer-inline active" id="${idPrefix}cd-${d.id}">⏱ ${waFmt(rem)}</span>
+    <div class="wa-prog-sm"><div class="wa-prog-sm-fill" id="${idPrefix}pb-${d.id}" style="width:${pct}%"></div></div>`;
 }
 
-function waRenderStats(){
-  const c={ok:0,rest:0,ban:0,disc:0};
-  waData.forEach(d=>c[d.status]=(c[d.status]||0)+1);
-  document.getElementById('wa-stats').innerHTML=`
-    <div class="wa-stat"><div class="wa-stat-icon wa-icon-ok">📶</div><div><div class="wa-stat-val" style="color:#22c55e">${c.ok}</div><div class="wa-stat-lbl">Conectados</div></div></div>
-    <div class="wa-stat"><div class="wa-stat-icon wa-icon-rest">⏸</div><div><div class="wa-stat-val" style="color:#f59e0b">${c.rest}</div><div class="wa-stat-lbl">Restrição</div></div></div>
-    <div class="wa-stat"><div class="wa-stat-icon wa-icon-ban">🚫</div><div><div class="wa-stat-val" style="color:#ef4444">${c.ban}</div><div class="wa-stat-lbl">Banidos</div></div></div>
-    <div class="wa-stat"><div class="wa-stat-icon wa-icon-disc">📵</div><div><div class="wa-stat-val" style="color:#64748b">${c.disc}</div><div class="wa-stat-lbl">Desconect.</div></div></div>
-  `;
-  // Atualizar select de operadoras
-  const opers = [...new Set(waData.map(d=>d.operadora).filter(Boolean))].sort();
-  const sel = document.getElementById('wa-foper');
-  if(sel){
-    const cur = sel.value;
-    sel.innerHTML = '<option value="">Operadoras</option>' + opers.map(o=>`<option value="${o}">${o}</option>`).join('');
-    sel.value = cur;
-  }
-}
-
-function waRender(){
+function waFilteredData(){
   const q = (document.getElementById('wa-search')?.value||'').toLowerCase();
   const fs = document.getElementById('wa-fstatus')?.value||'';
   const fp = document.getElementById('wa-fplat')?.value||'';
   const fo = document.getElementById('wa-foper')?.value||'';
-  const filtered = waData.filter(d=>{
+  return waData.filter(d=>{
     if(q && !d.num.includes(q) && !(d.nick||'').toLowerCase().includes(q)) return false;
     if(fs && d.status!==fs) return false;
     if(fp && d.plat!==fp) return false;
     if(fo && d.operadora!==fo) return false;
     return true;
   });
-  const el = document.getElementById('wa-cards');
-  const empty = document.getElementById('wa-empty');
-  if(!el) return;
-  empty.style.display = filtered.length?'none':'block';
-  el.innerHTML = filtered.map(d=>{
-    const s = waSM[d.status]||waSM.disc;
-    const borderCls = d.status==='rest'?'card-rest':d.status==='ban'?'card-ban':'';
-    const ini = waInitials(d.nick, d.num);
-    const rcol = d.restTotal>=4?'#ef4444':d.restTotal>=2?'#f59e0b':'var(--muted2)';
-    return `<div class="wa-card ${borderCls}">
-      <div class="wa-avatar ${s.av}">${ini}</div>
-      <div class="wa-body">
-        <div class="wa-nick">${d.nick||'Sem apelido'}</div>
-        <div class="wa-num">${d.num}${d.operadora?` · ${d.operadora}`:''}</div>
-        <div class="wa-meta">
-          <span class="wa-badge ${s.bcls}"><span class="wa-dot ${s.dot}"></span>${s.lbl}</span>
-          <span class="wa-plat">${waPM[d.plat]||d.plat||'—'}</span>
-          ${d.restTotal>0?`<span class="wa-rest-cnt" style="color:${rcol}">⚠ ${d.restTotal}x</span>`:''}
-          ${d.obs?`<span class="wa-obs" title="${d.obs}">${d.obs}</span>`:''}
-        </div>
-      </div>
-      <div class="wa-right">
-        <div class="wa-actions">
-          <button class="wa-act" onclick="waEdit(${d.id})" title="Editar">✏️</button>
-          <button class="wa-act" onclick="waDel(${d.id})" title="Excluir">✕</button>
-        </div>
-        ${waTimerHTML(d)}
-      </div>
-    </div>`;
-  }).join('');
-  waRenderStats();
+}
+
+function waRenderKPIs(){
+  const c={ok:0,rest:0,ban:0,disc:0};
+  waData.forEach(d=>c[d.status]=(c[d.status]||0)+1);
+  const el = document.getElementById('wa-kpi-strip');
+  if(el) el.innerHTML=`
+    <div class="wa-kpi"><div class="wa-kpi-label">Conectados</div><div class="wa-kpi-value ok">${c.ok}</div></div>
+    <div class="wa-kpi"><div class="wa-kpi-label">Restrição</div><div class="wa-kpi-value rest">${c.rest}</div></div>
+    <div class="wa-kpi"><div class="wa-kpi-label">Banidos</div><div class="wa-kpi-value ban">${c.ban}</div></div>
+    <div class="wa-kpi"><div class="wa-kpi-label">Desconect.</div><div class="wa-kpi-value disc">${c.disc}</div></div>`;
+  // Operadoras no filtro
+  const opers = [...new Set(waData.map(d=>d.operadora).filter(Boolean))].sort();
+  const sel = document.getElementById('wa-foper');
+  if(sel){ const cur=sel.value; sel.innerHTML='<option value="">Todas as operadoras</option>'+opers.map(o=>`<option value="${o}">${o}</option>`).join(''); sel.value=cur; }
+}
+
+function waRegCard(d){
+  const lbl = waSMLbl[d.status]||'—';
+  const bord = d.status==='rest'?'bord-rest':d.status==='ban'?'bord-ban':'';
+  const rcol = d.restTotal>=4?'var(--red)':d.restTotal>=2?'var(--yellow)':'var(--muted2)';
+  return `<div class="wa-reg-card ${bord}">
+    <div class="wa-reg-card-header">
+      <div class="wa-reg-date">${d.nick||d.num}</div>
+      <span class="wa-sbadge ${d.status}">${lbl}</span>
+    </div>
+    <div class="wa-reg-body">
+      <div class="wa-reg-row"><div class="wa-reg-row-label">Número</div><div class="wa-reg-row-value">${d.num}</div></div>
+      <div class="wa-reg-row"><div class="wa-reg-row-label">Operadora</div><div class="wa-reg-row-value">${d.operadora||'—'}</div></div>
+      <div class="wa-reg-row"><div class="wa-reg-row-label">Plataforma</div><div class="wa-reg-row-value">${waPM[d.plat]||d.plat||'—'}</div></div>
+      <div class="wa-reg-row"><div class="wa-reg-row-label">Restrições</div><div class="wa-reg-row-value" style="color:${rcol}">${d.restTotal||0}x</div></div>
+      <div class="wa-reg-row" style="grid-column:span 2"><div class="wa-reg-row-label">Timer restrição</div><div class="wa-reg-row-value">${waTimerCell(d,'m-')}</div></div>
+      ${d.obs?`<div class="wa-reg-row" style="grid-column:span 2"><div class="wa-reg-row-label">Obs.</div><div class="wa-reg-row-value" style="font-weight:400;color:var(--muted);font-style:italic">${d.obs}</div></div>`:''}
+    </div>
+    <div class="wa-reg-card-footer">
+      <button class="action-btn btn-sm" onclick="waEdit(${d.id})">✏️ Editar</button>
+      <button class="action-btn btn-sm" onclick="waDel(${d.id})">🗑️</button>
+    </div>
+  </div>`;
+}
+
+function waTRow(d){
+  const lbl = waSMLbl[d.status]||'—';
+  const rcol = d.restTotal>=4?'var(--red)':d.restTotal>=2?'var(--yellow)':'var(--muted2)';
+  return `<tr>
+    <td style="font-weight:600">${d.num}</td>
+    <td>${d.nick||'<span class="td-muted">—</span>'}</td>
+    <td><span class="wa-sbadge ${d.status}">${lbl}</span></td>
+    <td class="td-muted">${d.operadora||'—'}</td>
+    <td class="td-muted">${waPM[d.plat]||d.plat||'—'}</td>
+    <td style="color:${rcol};font-weight:600">${d.restTotal||0}x</td>
+    <td>${waTimerCell(d,'t-')}</td>
+    <td class="td-muted" style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.obs||''}">${d.obs?d.obs.slice(0,22)+(d.obs.length>22?'…':''):'—'}</td>
+    <td><button class="action-btn" onclick="waEdit(${d.id})">✏️</button><button class="action-btn" onclick="waDel(${d.id})">✕</button></td>
+  </tr>`;
+}
+
+function waRender(){
+  waRenderKPIs();
+  const filtered = waFilteredData();
+  const rl = document.getElementById('wa-reg-list');
+  const tw = document.getElementById('wa-table-wrap');
+  const emptyHTML = '<div class="empty-state"><div class="icon">📱</div>Nenhum número encontrado.</div>';
+  if(!filtered.length){
+    if(rl) rl.innerHTML = emptyHTML;
+    if(tw) tw.innerHTML = emptyHTML;
+    return;
+  }
+  if(rl) rl.innerHTML = filtered.map(d=>waRegCard(d)).join('');
+  if(tw) tw.innerHTML = `<table><thead><tr>
+    <th>Número</th><th>Apelido</th><th>Status</th><th>Operadora</th><th>Plataforma</th><th>Restrições</th><th>Timer / Restante</th><th>Obs.</th><th></th>
+  </tr></thead><tbody>${filtered.map(d=>waTRow(d)).join('')}</tbody></table>`;
 }
 
 function waTick(){
   waData.forEach(d=>{
     if(d.status!=='rest'||!d.restEnd) return;
     const rem = d.restEnd - Date.now();
-    const cd = document.getElementById('wcd-'+d.id);
-    const pb = document.getElementById('wpb-'+d.id);
-    if(!cd) return;
-    if(rem<=0){
-      cd.className='wa-timer wt-done'; cd.textContent='✓ Liberado!';
-      if(pb) pb.parentElement.style.display='none';
-    } else {
-      cd.textContent='⏱ '+waFmt(rem);
-      if(pb) pb.style.width=Math.round(Math.max(0,(rem/d._totalMs)*100))+'%';
-    }
+    ['t-','m-'].forEach(p=>{
+      const cd = document.getElementById(p+'cd-'+d.id);
+      const pb = document.getElementById(p+'pb-'+d.id);
+      if(!cd) return;
+      if(rem<=0){
+        cd.className='wa-timer-inline done'; cd.textContent='✓ Liberado';
+        if(pb) pb.parentElement.style.display='none';
+      } else {
+        cd.textContent='⏱ '+waFmt(rem);
+        if(pb) pb.style.width=Math.round(Math.max(0,(rem/d._totalMs)*100))+'%';
+      }
+    });
   });
 }
 setInterval(waTick,1000);
 
 function waToggleRest(){
   const show = document.getElementById('wf-status')?.value==='rest';
-  const rf = document.getElementById('wa-rest-fields');
+  const rf = document.getElementById('wa-rest-row');
   if(rf) rf.style.display = show?'block':'none';
 }
 
 function waOpenModal(id){
   waEditId = id||null;
-  const titleEl = document.getElementById('wa-modal-title');
-  if(titleEl) titleEl.textContent = id?'Editar número':'Novo número';
+  document.getElementById('wa-modal-title').textContent = id?'Editar número':'Novo número';
   const now2 = new Date();
   const ldt = new Date(now2-now2.getTimezoneOffset()*60000).toISOString().slice(0,16);
   if(id){
-    const d = waData.find(x=>x.id===id);
-    if(!d) return;
-    document.getElementById('wf-num').value = d.num||'';
-    document.getElementById('wf-nick').value = d.nick||'';
-    document.getElementById('wf-operadora').value = d.operadora||'';
-    document.getElementById('wf-plat').value = d.plat||'uaizap';
-    document.getElementById('wf-status').value = d.status||'ok';
-    document.getElementById('wf-rest-total').value = d.restTotal||0;
-    document.getElementById('wf-obs').value = d.obs||'';
+    const d = waData.find(x=>x.id===id); if(!d) return;
+    document.getElementById('wf-num').value=d.num||'';
+    document.getElementById('wf-nick').value=d.nick||'';
+    document.getElementById('wf-operadora').value=d.operadora||'';
+    document.getElementById('wf-plat').value=d.plat||'uaizap';
+    document.getElementById('wf-status').value=d.status||'ok';
+    document.getElementById('wf-rest-total').value=d.restTotal||0;
+    document.getElementById('wf-obs').value=d.obs||'';
     if(d.status==='rest'&&d.restEnd&&d._totalMs){
-      document.getElementById('wf-dur').value = d._totalMs/3600000;
-      const st = d.restEnd - d._totalMs;
-      document.getElementById('wf-horario').value = new Date(st - new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);
-    } else {
-      document.getElementById('wf-dur').value='6';
-      document.getElementById('wf-horario').value=ldt;
-    }
+      document.getElementById('wf-dur').value=d._totalMs/3600000;
+      document.getElementById('wf-horario').value=new Date(d.restEnd-d._totalMs-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);
+    } else { document.getElementById('wf-dur').value='6'; document.getElementById('wf-horario').value=ldt; }
   } else {
     ['wf-num','wf-nick','wf-obs'].forEach(i=>document.getElementById(i).value='');
     document.getElementById('wf-operadora').value='';
@@ -1392,61 +1364,43 @@ function waOpenModal(id){
     document.getElementById('wf-horario').value=ldt;
   }
   waToggleRest();
-  const ov = document.getElementById('wa-overlay');
-  if(ov) ov.classList.add('open');
+  document.getElementById('wa-overlay').classList.add('open');
 }
 
-function waCloseModal(){
-  const ov = document.getElementById('wa-overlay');
-  if(ov) ov.classList.remove('open');
-  waEditId = null;
-}
+function waCloseModal(){ document.getElementById('wa-overlay').classList.remove('open'); waEditId=null; }
 
 function waSave(){
   const num = document.getElementById('wf-num').value.trim();
   if(!num){ showToast('Informe o número!','error'); return; }
-  const st = document.getElementById('wf-status').value;
-  const dur = parseInt(document.getElementById('wf-dur').value)||6;
-  const hor = document.getElementById('wf-horario').value;
-  const totalMs = dur*3600000;
-  const restEnd = st==='rest'&&hor ? new Date(hor).getTime()+totalMs : null;
-  const obj = {
-    id: waEditId||waNextId++,
-    num, nick:document.getElementById('wf-nick').value.trim(),
+  const st=document.getElementById('wf-status').value;
+  const dur=parseInt(document.getElementById('wf-dur').value)||6;
+  const hor=document.getElementById('wf-horario').value;
+  const totalMs=dur*3600000;
+  const obj={
+    id:waEditId||waNextId++, num,
+    nick:document.getElementById('wf-nick').value.trim(),
     operadora:document.getElementById('wf-operadora').value,
     plat:document.getElementById('wf-plat').value,
     status:st,
     restTotal:parseInt(document.getElementById('wf-rest-total').value)||0,
-    restEnd, _totalMs:st==='rest'?totalMs:null,
+    restEnd:st==='rest'&&hor?new Date(hor).getTime()+totalMs:null,
+    _totalMs:st==='rest'?totalMs:null,
     obs:document.getElementById('wf-obs').value.trim()
   };
-  if(waEditId) waData = waData.map(x=>x.id===waEditId?obj:x);
-  else waData.push(obj);
-  waSaveLocal();
-  waCloseModal();
-  waRender();
+  if(waEditId) waData=waData.map(x=>x.id===waEditId?obj:x); else waData.push(obj);
+  waSaveLocal(); waCloseModal(); waRender();
   showToast('Salvo!','success');
 }
 
 function waEdit(id){ waOpenModal(id); }
 function waDel(id){
   confirmar('Remover este número?','Esta ação não pode ser desfeita.',()=>{
-    waData = waData.filter(x=>x.id!==id);
-    waSaveLocal();
-    waRender();
-    showToast('Removido.','info');
+    waData=waData.filter(x=>x.id!==id); waSaveLocal(); waRender(); showToast('Removido.','info');
   });
 }
 
-// Fechar ao clicar fora
-document.getElementById('wa-overlay').addEventListener('click',function(e){
-  if(e.target===this) waCloseModal();
-});
-
-// Inicializar quando a aba for aberta
+document.getElementById('wa-overlay').addEventListener('click',function(e){ if(e.target===this) waCloseModal(); });
 </script>
-
-</div><!-- /tab-numeros -->
 
 </div><!-- /app-content -->
 
