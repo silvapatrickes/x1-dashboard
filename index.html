@@ -452,7 +452,7 @@ body.light .mini-sel{color-scheme:light;}
 .hoje-hero-meta-label{font-size:.58rem;color:var(--muted2);margin-bottom:.2rem;}
 .hoje-meta-ring{width:58px;height:58px;position:relative;}
 .hoje-meta-ring svg{transform:rotate(-90deg);}
-.hoje-meta-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;}
+.hoje-meta-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;letter-spacing:-.02em;}
 
 /* ── TOAST MELHORADO ── */
 .toast{position:fixed;bottom:calc(72px + var(--safe-bottom) + .5rem);right:1rem;left:1rem;
@@ -668,6 +668,9 @@ body.light .mini-sel{color-scheme:light;}
     <div class="kpi-grid">
       <div class="kpi"><div class="kpi-label">Lucro Líquido</div><div class="kpi-value" id="kpi-lucro">R$ 0,00</div><div class="prog-bar" id="kpi-lucro-prog" style="display:none"><div class="prog-fill" id="kpi-lucro-fill" style="width:0%"></div></div><div class="prog-text" id="kpi-lucro-txt" style="display:none"><span id="kpi-lucro-pct"></span><span id="kpi-lucro-meta"></span></div></div>
       <div class="kpi"><div class="kpi-label">Lucro Bruto</div><div class="kpi-value" id="kpi-lucro-bruto">R$ 0,00</div><div class="kpi-sub">Sem IOF e sem despesas</div></div>
+      <div class="kpi"><div class="kpi-label">Receita</div><div class="kpi-value" id="kpi-receita">R$ 0,00</div></div>
+      <div class="kpi"><div class="kpi-label">Gastos Anúncios</div><div class="kpi-value" id="kpi-gastos">R$ 0,00</div></div>
+      <div class="kpi"><div class="kpi-label">Vendas</div><div class="kpi-value" id="kpi-vendas">0</div></div>
       <div class="kpi"><div class="kpi-label">Margem</div><div class="kpi-value" id="kpi-margem">N/A</div></div>
       <div class="kpi"><div class="kpi-label">ROI Médio</div><div class="kpi-value" id="kpi-roi">N/A</div></div>
       <div class="kpi"><div class="kpi-label">IOF Total</div><div class="kpi-value" id="kpi-iof">R$ 0,00</div></div>
@@ -2811,8 +2814,8 @@ function atualizarHojeHero(){
   const metaPct   = document.getElementById('hoje-meta-pct');
   if(!heroValor) return;
 
-  heroValor.textContent  = fmtBRL(lucroHoje);
-  heroValor.className    = 'hoje-hero-valor ' + (lucroHoje>0?'pos':lucroHoje<0?'neg':'zero');
+  heroValor.textContent = fmtBRL(lucroHoje);
+  heroValor.className   = 'hoje-hero-valor ' + (lucroHoje>0?'pos':lucroHoje<0?'neg':'zero');
   if(heroSub) heroSub.textContent = regsHoje.length>0
     ? `${regsHoje.length} registro${regsHoje.length>1?'s':''} hoje`
     : 'Nenhum registro hoje ainda';
@@ -2820,49 +2823,50 @@ function atualizarHojeHero(){
   const metaMensal = (metas&&(metas.mensal||metas.lucroMensal)) ||
     parseFloat(document.getElementById('meta-mensal')?.value||'0') || 0;
 
-  if(metaMensal > 0 && metaDash && metaPct){
+  if(metaMensal>0 && metaDash && metaPct){
     const diasMes = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
     const metaDia = metaMensal / diasMes;
-    const pct     = metaDia !== 0 ? lucroHoje / metaDia : 0;   // ex: 1.45 = 145%
-    const pctInt  = Math.round(pct * 100);                      // ex: 145
-    const circ    = 150.8;                                      // circunferência do círculo (2πr)
+    const pct     = metaDia !== 0 ? lucroHoje / metaDia : 0;  // ex: 1.45 = 145%
+    const pctInt  = Math.round(pct * 100);
+    const circ    = 150.8;
+
+    // ── texto ──
+    metaPct.textContent = pctInt + '%';
 
     // ── cores ──
     let cor;
-    if(lucroHoje < 0)    cor = 'var(--red)';
-    else if(pct >= 2)    cor = '#a855f7';   // roxo — dobrou a meta
-    else if(pct >= 1)    cor = 'var(--green)';
-    else                 cor = 'var(--yellow)';
+    if(lucroHoje < 0)  cor = 'var(--red)';
+    else if(pct >= 2)  cor = 'var(--purple)';  // dobrou a meta
+    else if(pct >= 1)  cor = 'var(--green)';
+    else               cor = 'var(--yellow)';
 
-    if(metaDash)  metaDash.style.stroke  = cor;
-    if(metaDash2) metaDash2.style.stroke = 'var(--green)';
-    if(metaPct){  metaPct.textContent = pctInt + '%'; metaPct.style.color = cor; }
+    metaDash.style.stroke = cor;
+    metaPct.style.color   = cor;
 
+    // ── anel principal ──
     if(lucroHoje < 0){
-      // negativo: anel vazio + texto vermelho
-      if(metaDash)  metaDash.style.strokeDashoffset  = circ;
-      if(metaDash2) metaDash2.style.strokeDashoffset = circ;
-      if(metaDash2) metaDash2.style.opacity = '0';
-
-    } else if(pct <= 1){
-      // 0–100 %: volta única, sem anel secundário
-      if(metaDash)  metaDash.style.strokeDashoffset  = circ * (1 - pct);
-      if(metaDash2) metaDash2.style.strokeDashoffset = circ;
-      if(metaDash2) metaDash2.style.opacity = '0';
-
+      metaDash.style.strokeDashoffset = circ;          // vazio
+    } else if(pct >= 1){
+      metaDash.style.strokeDashoffset = 0;             // completo
     } else {
-      // acima de 100 %: anel primário completo + anel secundário mostrando o excesso
-      const excesso = pct - Math.floor(pct);  // parte fracionária da volta atual
-      if(metaDash)  metaDash.style.strokeDashoffset  = 0;                      // volta completa
-      if(metaDash2){
-        metaDash2.style.opacity            = '1';
-        metaDash2.style.strokeDashoffset   = circ * (1 - excesso);             // volta parcial do excesso
-        // cor do anel extra: verde até 200%, roxo acima de 200%
-        metaDash2.style.stroke = pct >= 2 ? '#a855f7' : 'var(--green)';
+      metaDash.style.strokeDashoffset = circ * (1 - pct);
+    }
+
+    // ── anel secundário (excesso acima de 100%) ──
+    if(metaDash2){
+      if(pct > 1){
+        const excesso = pct % 1;                        // fração da volta extra
+        metaDash2.style.opacity           = '1';
+        metaDash2.style.stroke            = pct >= 2 ? 'var(--purple)' : 'var(--green)';
+        metaDash2.style.strokeDashoffset  = circ * (1 - excesso);
+      } else {
+        metaDash2.style.opacity = '0';
+        metaDash2.style.strokeDashoffset = circ;
       }
     }
+
   } else if(metaPct){
-    metaPct.textContent = metaMensal > 0 ? '0%' : '—';
+    metaPct.textContent = metaMensal>0 ? '0%' : '—';
     if(metaDash)  metaDash.style.strokeDashoffset  = 150.8;
     if(metaDash2) metaDash2.style.opacity = '0';
   }
