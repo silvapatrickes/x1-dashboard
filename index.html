@@ -452,7 +452,7 @@ body.light .mini-sel{color-scheme:light;}
 .hoje-hero-meta-label{font-size:.58rem;color:var(--muted2);margin-bottom:.2rem;}
 .hoje-meta-ring{width:58px;height:58px;position:relative;}
 .hoje-meta-ring svg{transform:rotate(-90deg);}
-.hoje-meta-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;letter-spacing:-.02em;}
+.hoje-meta-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;}
 
 /* ── TOAST MELHORADO ── */
 .toast{position:fixed;bottom:calc(72px + var(--safe-bottom) + .5rem);right:1rem;left:1rem;
@@ -512,35 +512,6 @@ body.light .mini-sel{color-scheme:light;}
 #supa-status{font-size:.7rem;margin-top:.45rem;text-align:center;}
 .logout-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.68rem;font-family:'Inter',sans-serif;}
 .logout-btn:hover{color:var(--red);}
-
-/* ── FILTRO RESUMO (período + oferta) ── */
-/* Valores dos 6 cards do resumo: mesma cor do label, sem negrito */
-#resumo-6cards .kpi-value,
-#resumo-6cards .kpi-value.pos,
-#resumo-6cards .kpi-value.neg {
-  color: var(--muted) !important;
-  font-weight: 400 !important;
-}
-.resumo-filtro-bar{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem;align-items:flex-end;}
-.resumo-filtro-item{display:flex;flex-direction:column;gap:.25rem;}
-.resumo-filtro-label{font-size:.6rem;font-weight:500;color:var(--muted2);text-transform:uppercase;letter-spacing:.05em;}
-.resumo-filtro-sel{
-  background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
-  padding:.45rem .75rem;color:var(--text);font-family:'Inter',sans-serif;font-size:.76rem;
-  outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238892a4'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right .6rem center;padding-right:1.8rem;
-  min-width:140px;
-}
-.resumo-filtro-sel:focus{border-color:var(--accent);}
-.resumo-filtro-date-wrap{display:flex;gap:.35rem;align-items:center;}
-.resumo-filtro-date{
-  background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
-  padding:.45rem .65rem;color:var(--text);font-family:'Inter',sans-serif;font-size:.76rem;
-  outline:none;color-scheme:dark;width:130px;
-}
-.resumo-filtro-date:focus{border-color:var(--accent);}
-.resumo-filtro-sep{font-size:.7rem;color:var(--muted2);}
 </style>
 </head>
 <body>
@@ -585,7 +556,6 @@ body.light .mini-sel{color-scheme:light;}
   <button class="dtab" onclick="switchTab('historico',this,3)" data-tab="historico">Histórico</button>
   <button class="dtab" onclick="switchTab('graficos',this,4)" data-tab="graficos">Gráficos</button>
   <button class="dtab" onclick="switchTab('crescimento',this,5)" data-tab="crescimento">Crescimento</button>
-  <button class="dtab" onclick="switchTab('numeros',this,7)" data-tab="numeros">📱 Números</button>
   <button class="dtab" onclick="switchTab('config',this,6)" data-tab="config">Config</button>
 </div>
 
@@ -622,36 +592,6 @@ body.light .mini-sel{color-scheme:light;}
         <div class="meta-wrap"><span class="meta-label">Meta mês</span><input class="meta-input" type="number" id="meta-mensal" placeholder="Ex: 10000" oninput="salvarMeta();renderKPIs();"></div>
       </div>
     </div>
-    <!-- FILTRO PERÍODO + OFERTA -->
-    <div class="resumo-filtro-bar" id="resumo-filtro-bar">
-      <div class="resumo-filtro-item">
-        <span class="resumo-filtro-label">Período de Visualização</span>
-        <select class="resumo-filtro-sel" id="resumo-periodo-sel" onchange="aplicarFiltroResumo()">
-          <option value="mes_atual">Esse mês</option>
-          <option value="hoje">Hoje</option>
-          <option value="ontem">Ontem</option>
-          <option value="7dias">Últimos 7 dias</option>
-          <option value="mes_passado">Mês passado</option>
-          <option value="maximo">Máximo</option>
-          <option value="personalizado">Personalizado</option>
-        </select>
-      </div>
-      <div class="resumo-filtro-item" id="resumo-datas-wrap" style="display:none;">
-        <span class="resumo-filtro-label">Intervalo</span>
-        <div class="resumo-filtro-date-wrap">
-          <input type="date" class="resumo-filtro-date" id="resumo-de" onchange="aplicarFiltroResumo()" />
-          <span class="resumo-filtro-sep">—</span>
-          <input type="date" class="resumo-filtro-date" id="resumo-ate" onchange="aplicarFiltroResumo()" />
-        </div>
-      </div>
-      <div class="resumo-filtro-item">
-        <span class="resumo-filtro-label">Oferta</span>
-        <select class="resumo-filtro-sel" id="resumo-oferta-sel" onchange="aplicarFiltroResumo()">
-          <option value="">Qualquer</option>
-        </select>
-      </div>
-    </div>
-
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.75rem;" id="resumo-6cards">
       <div class="kpi"><div class="kpi-label">💰 Lucro Líquido</div><div class="kpi-value" id="r6-lucro">R$ 0,00</div></div>
       <div class="kpi"><div class="kpi-label">📈 Receita</div><div class="kpi-value" id="r6-receita">R$ 0,00</div></div>
@@ -668,9 +608,6 @@ body.light .mini-sel{color-scheme:light;}
     <div class="kpi-grid">
       <div class="kpi"><div class="kpi-label">Lucro Líquido</div><div class="kpi-value" id="kpi-lucro">R$ 0,00</div><div class="prog-bar" id="kpi-lucro-prog" style="display:none"><div class="prog-fill" id="kpi-lucro-fill" style="width:0%"></div></div><div class="prog-text" id="kpi-lucro-txt" style="display:none"><span id="kpi-lucro-pct"></span><span id="kpi-lucro-meta"></span></div></div>
       <div class="kpi"><div class="kpi-label">Lucro Bruto</div><div class="kpi-value" id="kpi-lucro-bruto">R$ 0,00</div><div class="kpi-sub">Sem IOF e sem despesas</div></div>
-      <div class="kpi"><div class="kpi-label">Receita</div><div class="kpi-value" id="kpi-receita">R$ 0,00</div></div>
-      <div class="kpi"><div class="kpi-label">Gastos Anúncios</div><div class="kpi-value" id="kpi-gastos">R$ 0,00</div></div>
-      <div class="kpi"><div class="kpi-label">Vendas</div><div class="kpi-value" id="kpi-vendas">0</div></div>
       <div class="kpi"><div class="kpi-label">Margem</div><div class="kpi-value" id="kpi-margem">N/A</div></div>
       <div class="kpi"><div class="kpi-label">ROI Médio</div><div class="kpi-value" id="kpi-roi">N/A</div></div>
       <div class="kpi"><div class="kpi-label">IOF Total</div><div class="kpi-value" id="kpi-iof">R$ 0,00</div></div>
@@ -728,11 +665,7 @@ body.light .mini-sel{color-scheme:light;}
         <svg width="58" height="58" viewBox="0 0 58 58">
           <circle cx="29" cy="29" r="24" fill="none" stroke="var(--border2)" stroke-width="5"/>
           <circle cx="29" cy="29" r="24" fill="none" stroke="var(--green)" stroke-width="5"
-            stroke-dasharray="150.8" id="hoje-meta-dash" stroke-dashoffset="150.8" stroke-linecap="round"
-            style="transition:stroke-dashoffset .6s ease,stroke .3s ease"/>
-          <circle cx="29" cy="29" r="24" fill="none" stroke="var(--green)" stroke-width="3"
-            stroke-dasharray="150.8" id="hoje-meta-dash2" stroke-dashoffset="150.8" stroke-linecap="round"
-            opacity="0" style="transition:stroke-dashoffset .6s ease,stroke .3s ease,opacity .3s ease"/>
+            stroke-dasharray="150.8" id="hoje-meta-dash" stroke-dashoffset="150.8" stroke-linecap="round"/>
         </svg>
         <div class="hoje-meta-pct" id="hoje-meta-pct">0%</div>
       </div>
@@ -1044,454 +977,6 @@ body.light .mini-sel{color-scheme:light;}
   </div>
 </div>
 
-<!-- NÚMEROS -->
-<div class="view" id="tab-numeros">
-<style>
-/* ── KPI strip ── */
-.wa-kpi-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem;margin-bottom:.85rem;}
-.wa-kpi{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.65rem .8rem;}
-.wa-kpi-label{font-size:.6rem;font-weight:500;color:var(--muted);margin-bottom:.22rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.wa-kpi-value{font-size:.92rem;font-weight:700;letter-spacing:-.02em;}
-.wa-kv-ok{color:var(--green);}
-.wa-kv-rest{color:var(--yellow);}
-.wa-kv-ban{color:var(--red);}
-.wa-kv-disc{color:var(--muted);}
-/* ── status badges ── */
-.wsb{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:999px;font-size:.6rem;font-weight:700;white-space:nowrap;}
-.wsb-ok{background:rgba(34,197,94,.12);color:var(--green);}
-.wsb-rest{background:rgba(245,158,11,.15);color:var(--yellow);}
-.wsb-ban{background:rgba(239,68,68,.12);color:var(--red);}
-.wsb-disc{background:rgba(100,116,139,.1);color:var(--muted);}
-/* ── platform badges ── */
-.wpb{display:inline-flex;padding:2px 7px;border-radius:999px;font-size:.58rem;font-weight:600;border:1px solid var(--border2);color:var(--muted2);white-space:nowrap;}
-/* ── timer ── */
-.wt-active{color:var(--yellow);font-size:.68rem;font-weight:700;font-variant-numeric:tabular-nums;display:inline-block;}
-.wt-done{color:var(--green);font-size:.68rem;font-weight:700;}
-.wt-none{color:var(--muted2);font-size:.68rem;}
-.wa-prog{height:3px;background:var(--border2);border-radius:2px;overflow:hidden;margin-top:3px;min-width:60px;}
-.wa-prog-fill{height:100%;border-radius:2px;background:var(--yellow);transition:width 1s linear;}
-/* ── saúde ── */
-.wa-health{display:flex;align-items:center;gap:5px;}
-.wa-health-bar{flex:1;height:5px;background:var(--border2);border-radius:3px;overflow:hidden;min-width:40px;}
-.wa-health-fill{height:100%;border-radius:3px;transition:width .4s;}
-.wa-health-val{font-size:.62rem;font-weight:700;white-space:nowrap;}
-/* ── histórico ícones ── */
-.wa-hist{display:flex;gap:2px;align-items:center;}
-.wa-hd{width:9px;height:9px;border-radius:50%;}
-/* ── tabela específica ── */
-#wa-table-wrap table{width:100%;}
-#wa-table-wrap th{font-size:.6rem;padding:.6rem .7rem;letter-spacing:.04em;}
-#wa-table-wrap td{padding:.62rem .7rem;vertical-align:middle;}
-#wa-table-wrap tbody tr:hover td{background:var(--surface2);}
-#wa-table-wrap tbody tr.row-rest td{background:rgba(245,158,11,.03);}
-#wa-table-wrap tbody tr.row-ban td{background:rgba(239,68,68,.03);}
-/* ── reg cards mobile ── */
-.wa-reg-list{display:flex;flex-direction:column;gap:.5rem;}
-.wa-reg-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.85rem;}
-.wa-reg-card.bord-rest{border-left:3px solid var(--yellow);}
-.wa-reg-card.bord-ban{border-left:3px solid var(--red);}
-.wa-reg-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.55rem;}
-.wa-reg-nick{font-weight:700;font-size:.82rem;}
-.wa-reg-body{display:grid;grid-template-columns:1fr 1fr;gap:.3rem .6rem;}
-.wa-rr{display:flex;flex-direction:column;gap:.03rem;}
-.wa-rr-l{font-size:.58rem;color:var(--muted);}
-.wa-rr-v{font-size:.76rem;font-weight:600;}
-.wa-reg-footer{display:flex;justify-content:flex-end;gap:.3rem;margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--border);}
-/* ── modal ── */
-.wa-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:400;align-items:flex-end;justify-content:center;}
-.wa-overlay.open{display:flex;}
-.wa-modal{background:var(--surface);border-radius:16px 16px 0 0;padding:1.25rem;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;padding-bottom:calc(1.25rem + var(--safe-bottom));}
-@media(min-width:768px){.wa-modal{border-radius:14px;align-self:center;max-height:88vh;}}
-.wa-modal-handle{width:36px;height:4px;background:var(--border2);border-radius:999px;margin:0 auto .85rem;}
-@media(min-width:768px){.wa-modal-handle{display:none;}}
-.wa-modal-ttl{font-size:.76rem;font-weight:700;color:var(--text);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.95rem;display:flex;align-items:center;justify-content:space-between;}
-.wa-modal-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:.2rem;line-height:1;border-radius:4px;}
-.wa-modal-x:hover{color:var(--text);}
-.wa-sec{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted2);margin:.65rem 0 .5rem;padding-bottom:.3rem;border-bottom:1px solid var(--border);}
-.wa-fg{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-bottom:.5rem;}
-.wa-f{display:flex;flex-direction:column;gap:.22rem;}
-.wa-f label{font-size:.65rem;font-weight:500;color:var(--muted);}
-.wa-f input,.wa-f select,.wa-f textarea{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:.6rem .75rem;color:var(--text);font-family:'Inter',sans-serif;font-size:16px;outline:none;width:100%;-webkit-appearance:none;appearance:none;}
-.wa-f input:focus,.wa-f select:focus{border-color:var(--yellow);}
-.wa-f textarea{resize:none;font-size:.82rem;min-height:60px;}
-.wa-rest-row{display:none;margin-bottom:.5rem;}
-.wa-modal-acts{display:flex;gap:.45rem;margin-top:1rem;}
-</style>
-
-<!-- KPI strip -->
-<div class="wa-kpi-strip" id="wa-kpi-strip"></div>
-
-<!-- toolbar -->
-<div class="filter-bar" style="margin-bottom:.75rem;">
-  <input type="text" id="wa-search" placeholder="Buscar número ou apelido..." style="font-size:.75rem;flex:1;min-width:120px;max-width:200px;" oninput="waRender()">
-  <select id="wa-fstatus" onchange="waRender()" style="font-size:.75rem;background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:.38rem .65rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;-webkit-appearance:none;">
-    <option value="">Todos os status</option>
-    <option value="ok">Conectado</option>
-    <option value="rest">Restrição</option>
-    <option value="ban">Banido</option>
-    <option value="disc">Desconectado</option>
-  </select>
-  <select id="wa-foper" onchange="waRender()" style="font-size:.75rem;background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:.38rem .65rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;-webkit-appearance:none;">
-    <option value="">Todas as operadoras</option>
-  </select>
-  <select id="wa-fplat" onchange="waRender()" style="font-size:.75rem;background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:.38rem .65rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;-webkit-appearance:none;">
-    <option value="">Todas as plataformas</option>
-    <option value="uaizap">Uaizap</option>
-    <option value="meta">API Meta</option>
-    <option value="manual">Manual</option>
-    <option value="outro">Outra</option>
-  </select>
-  <button class="btn btn-primary btn-sm" onclick="waOpenModal()" style="margin-left:auto">＋ Número</button>
-</div>
-
-<!-- mobile: cards -->
-<div class="wa-reg-list" id="wa-reg-list"></div>
-<!-- desktop: tabela -->
-<div class="table-wrap" id="wa-table-wrap"><div class="empty-state"><div class="icon">📱</div>Nenhum número cadastrado.</div></div>
-
-<!-- MODAL -->
-<div class="wa-overlay" id="wa-overlay">
-  <div class="wa-modal">
-    <div class="wa-modal-handle"></div>
-    <div class="wa-modal-ttl">
-      <span id="wa-modal-title">Novo número</span>
-      <button class="wa-modal-x" onclick="waCloseModal()">✕</button>
-    </div>
-
-    <div class="wa-sec">Identificação</div>
-    <div class="wa-fg">
-      <div class="wa-f"><label>Número (com DDD)</label><input id="wf-num" placeholder="41999990000" inputmode="numeric"></div>
-      <div class="wa-f"><label>Apelido</label><input id="wf-nick" placeholder="Vendas principal"></div>
-      <div class="wa-f"><label>Operadora</label>
-        <select id="wf-operadora">
-          <option value="">—</option>
-          <option value="Vivo">Vivo</option>
-          <option value="Claro">Claro</option>
-          <option value="TIM">TIM</option>
-          <option value="Oi">Oi</option>
-          <option value="Outra">Outra</option>
-        </select>
-      </div>
-      <div class="wa-f"><label>Plataforma</label>
-        <select id="wf-plat">
-          <option value="uaizap">Uaizap</option>
-          <option value="meta">API Meta</option>
-          <option value="manual">Manual</option>
-          <option value="outro">Outra</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="wa-sec">Status & Restrições</div>
-    <div class="wa-fg">
-      <div class="wa-f"><label>Status atual</label>
-        <select id="wf-status" onchange="waToggleRest()">
-          <option value="ok">✅ Conectado</option>
-          <option value="rest">⏸ Em restrição</option>
-          <option value="ban">🚫 Banido</option>
-          <option value="disc">📵 Desconectado</option>
-        </select>
-      </div>
-      <div class="wa-f"><label>Total de restrições acumuladas</label><input id="wf-rest-total" type="number" value="0" min="0" inputmode="numeric"></div>
-    </div>
-
-    <div class="wa-rest-row" id="wa-rest-row">
-      <div class="wa-sec" style="margin-top:0">Restrição ativa — timer</div>
-      <div class="wa-fg">
-        <div class="wa-f"><label>Duração</label>
-          <select id="wf-dur">
-            <option value="6">6 horas</option>
-            <option value="24">24 horas</option>
-          </select>
-        </div>
-        <div class="wa-f"><label>Horário que tomou</label><input id="wf-horario" type="datetime-local"></div>
-      </div>
-    </div>
-
-    <div class="wa-f" style="margin-bottom:.5rem"><label>Última restrição em (data)</label><input id="wf-last-rest" type="date"></div>
-    <div class="wa-f" style="margin-bottom:.5rem"><label>Observações</label><textarea id="wf-obs" placeholder="Anotações livres..."></textarea></div>
-
-    <div class="wa-modal-acts">
-      <button class="btn btn-primary" onclick="waSave()">Salvar</button>
-      <button class="btn btn-ghost" onclick="waCloseModal()">Cancelar</button>
-    </div>
-  </div>
-</div>
-</div><!-- /tab-numeros -->
-
-<script>
-/* ═══════════════════════════════
-   WA MANAGER
-═══════════════════════════════ */
-let waData = JSON.parse(localStorage.getItem('x1_wa_numeros') || '[]');
-let waNextId = waData.length ? Math.max(...waData.map(d=>d.id))+1 : 1;
-let waEditId = null;
-
-const waSMLbl = {ok:'Conectado', rest:'Restrição', ban:'Banido', disc:'Desconectado'};
-const waPM    = {uaizap:'Uaizap', meta:'API Meta', manual:'Manual', outro:'Outra'};
-
-function waSaveLocal(){ localStorage.setItem('x1_wa_numeros', JSON.stringify(waData)); }
-
-/* ── timer helpers ── */
-function waFmt(ms){
-  if(ms<=0) return null;
-  const h=Math.floor(ms/3600000), m=Math.floor((ms%3600000)/60000), s=Math.floor((ms%60000)/1000);
-  return (h>0?h+'h ':'')+String(m).padStart(2,'0')+'m '+String(s).padStart(2,'0')+'s';
-}
-
-function waTimerCell(d, prefix){
-  if(d.status!=='rest'||!d.restEnd) return '<span class="wt-none">—</span>';
-  const rem = d.restEnd - Date.now();
-  if(rem<=0) return '<span class="wt-done">✓ Liberado</span>';
-  const pct = Math.round(Math.max(0,Math.min(100,(rem/d._totalMs)*100)));
-  return `<span class="wt-active" id="${prefix}cd-${d.id}">⏱ ${waFmt(rem)}</span>
-<div class="wa-prog"><div class="wa-prog-fill" id="${prefix}pb-${d.id}" style="width:${pct}%"></div></div>`;
-}
-
-/* ── saúde do número (0-100) ── */
-function waHealth(d){
-  // desconta por restrições e recência
-  let score = 100;
-  score -= Math.min(d.restTotal||0, 5) * 14;          // até -70 por restrições
-  if(d.status==='ban')  score = Math.min(score, 5);
-  if(d.status==='disc') score = Math.min(score, 40);
-  if(d.status==='rest') score = Math.min(score, 55);
-  score = Math.max(0, score);
-  const col = score>=70?'var(--green)':score>=40?'var(--yellow)':'var(--red)';
-  return {score, col};
-}
-
-/* ── histórico visual (últimas restrições estimadas) ── */
-function waHistDots(d){
-  const n = Math.min(d.restTotal||0, 6);
-  if(!n) return '<span class="td-muted" style="font-size:.65rem">—</span>';
-  let html = '<div class="wa-hist">';
-  for(let i=0;i<n;i++){
-    const col = i===n-1&&d.status==='rest'?'var(--yellow)':'var(--red)';
-    html+=`<div class="wa-hd" style="background:${col};opacity:${1-(i*0.12)}"></div>`;
-  }
-  return html+'</div>';
-}
-
-/* ── filtro ── */
-function waFilteredData(){
-  const q  = (document.getElementById('wa-search')?.value||'').toLowerCase();
-  const fs = document.getElementById('wa-fstatus')?.value||'';
-  const fp = document.getElementById('wa-fplat')?.value||'';
-  const fo = document.getElementById('wa-foper')?.value||'';
-  return waData.filter(d=>{
-    if(q  && !d.num.includes(q) && !(d.nick||'').toLowerCase().includes(q)) return false;
-    if(fs && d.status!==fs) return false;
-    if(fp && d.plat!==fp)   return false;
-    if(fo && d.operadora!==fo) return false;
-    return true;
-  });
-}
-
-/* ── KPIs ── */
-function waRenderKPIs(){
-  const c={ok:0,rest:0,ban:0,disc:0};
-  waData.forEach(d=>c[d.status]=(c[d.status]||0)+1);
-  const totalRest = waData.reduce((s,d)=>s+(d.restTotal||0),0);
-  const el = document.getElementById('wa-kpi-strip');
-  if(el) el.innerHTML=`
-    <div class="wa-kpi"><div class="wa-kpi-label">✅ Conectados</div><div class="wa-kpi-value wa-kv-ok">${c.ok}</div></div>
-    <div class="wa-kpi"><div class="wa-kpi-label">⏸ Em restrição</div><div class="wa-kpi-value wa-kv-rest">${c.rest}</div></div>
-    <div class="wa-kpi"><div class="wa-kpi-label">🚫 Banidos</div><div class="wa-kpi-value wa-kv-ban">${c.ban}</div></div>
-    <div class="wa-kpi"><div class="wa-kpi-label">⚠ Total restrições</div><div class="wa-kpi-value" style="color:${totalRest>=10?'var(--red)':totalRest>=4?'var(--yellow)':'var(--text)'}">${totalRest}</div></div>`;
-  // popula operadoras
-  const opers = [...new Set(waData.map(d=>d.operadora).filter(Boolean))].sort();
-  const sel = document.getElementById('wa-foper');
-  if(sel){ const cur=sel.value; sel.innerHTML='<option value="">Todas as operadoras</option>'+opers.map(o=>`<option value="${o}">${o}</option>`).join(''); sel.value=cur; }
-}
-
-/* ── mobile card ── */
-function waRegCard(d){
-  const bord = d.status==='rest'?'bord-rest':d.status==='ban'?'bord-ban':'';
-  const {score,col} = waHealth(d);
-  const lastR = d.lastRest ? d.lastRest.split('-').reverse().join('/') : '—';
-  return `<div class="wa-reg-card ${bord}">
-    <div class="wa-reg-header">
-      <div class="wa-reg-nick">${d.nick||d.num}</div>
-      <span class="wsb wsb-${d.status}">${waSMLbl[d.status]||'—'}</span>
-    </div>
-    <div class="wa-reg-body">
-      <div class="wa-rr"><div class="wa-rr-l">Número</div><div class="wa-rr-v">${d.num}</div></div>
-      <div class="wa-rr"><div class="wa-rr-l">Operadora</div><div class="wa-rr-v">${d.operadora||'—'}</div></div>
-      <div class="wa-rr"><div class="wa-rr-l">Plataforma</div><div class="wa-rr-v">${waPM[d.plat]||'—'}</div></div>
-      <div class="wa-rr"><div class="wa-rr-l">Restrições</div><div class="wa-rr-v" style="color:${d.restTotal>=4?'var(--red)':d.restTotal>=2?'var(--yellow)':'var(--text)'}">${d.restTotal||0}x</div></div>
-      <div class="wa-rr"><div class="wa-rr-l">Última restr.</div><div class="wa-rr-v">${lastR}</div></div>
-      <div class="wa-rr"><div class="wa-rr-l">Tipo</div><div class="wa-rr-v">${d._totalMs?(d._totalMs/3600000)+'h':'—'}</div></div>
-      <div class="wa-rr" style="grid-column:span 2"><div class="wa-rr-l">Saúde</div>
-        <div class="wa-health"><div class="wa-health-bar"><div class="wa-health-fill" style="width:${score}%;background:${col}"></div></div><span class="wa-health-val" style="color:${col}">${score}</span></div>
-      </div>
-      <div class="wa-rr" style="grid-column:span 2"><div class="wa-rr-l">Timer</div><div class="wa-rr-v">${waTimerCell(d,'m-')}</div></div>
-      ${d.obs?`<div class="wa-rr" style="grid-column:span 2"><div class="wa-rr-l">Obs.</div><div class="wa-rr-v" style="font-weight:400;color:var(--muted);font-style:italic;font-size:.72rem">${d.obs}</div></div>`:''}
-    </div>
-    <div class="wa-reg-footer">
-      <button class="action-btn btn-sm" onclick="waEdit(${d.id})">✏️ Editar</button>
-      <button class="action-btn btn-sm" onclick="waDel(${d.id})">🗑️</button>
-    </div>
-  </div>`;
-}
-
-/* ── desktop row ── */
-function waTRow(d){
-  const {score,col} = waHealth(d);
-  const rcls = d.status==='rest'?'row-rest':d.status==='ban'?'row-ban':'';
-  const lastR = d.lastRest ? d.lastRest.split('-').reverse().join('/') : '<span class="td-muted">—</span>';
-  const tipo  = d._totalMs ? `<span style="font-weight:600;color:var(--yellow)">${d._totalMs/3600000}h</span>` : '<span class="td-muted">—</span>';
-  return `<tr class="${rcls}">
-    <td style="font-weight:600;white-space:nowrap">${d.num}</td>
-    <td style="color:var(--muted);font-size:.72rem">${d.nick||'<span class="td-muted">—</span>'}</td>
-    <td><span class="wsb wsb-${d.status}">${waSMLbl[d.status]||'—'}</span></td>
-    <td class="td-muted">${d.operadora||'—'}</td>
-    <td><span class="wpb">${waPM[d.plat]||d.plat||'—'}</span></td>
-    <td style="color:${d.restTotal>=4?'var(--red)':d.restTotal>=2?'var(--yellow)':'var(--text)'};font-weight:700;text-align:center">${d.restTotal||0}×</td>
-    <td>${tipo}</td>
-    <td>${waHistDots(d)}</td>
-    <td class="td-muted" style="font-size:.68rem;white-space:nowrap">${lastR}</td>
-    <td>
-      <div class="wa-health" style="min-width:80px">
-        <div class="wa-health-bar"><div class="wa-health-fill" style="width:${score}%;background:${col}"></div></div>
-        <span class="wa-health-val" style="color:${col}">${score}</span>
-      </div>
-    </td>
-    <td>${waTimerCell(d,'t-')}</td>
-    <td class="td-muted" style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.68rem" title="${d.obs||''}">${d.obs?d.obs.slice(0,18)+(d.obs.length>18?'…':''):'—'}</td>
-    <td style="white-space:nowrap"><button class="action-btn" onclick="waEdit(${d.id})" title="Editar">✏️</button><button class="action-btn" onclick="waDel(${d.id})" title="Excluir">✕</button></td>
-  </tr>`;
-}
-
-/* ── render principal ── */
-function waRender(){
-  waRenderKPIs();
-  const filtered = waFilteredData();
-  const rl = document.getElementById('wa-reg-list');
-  const tw = document.getElementById('wa-table-wrap');
-  const emptyHTML = '<div class="empty-state"><div class="icon">📱</div>Nenhum número encontrado.</div>';
-  if(!filtered.length){
-    if(rl) rl.innerHTML = emptyHTML;
-    if(tw) tw.innerHTML = emptyHTML;
-    return;
-  }
-  if(rl) rl.innerHTML = filtered.map(d=>waRegCard(d)).join('');
-  if(tw) tw.innerHTML = `<table>
-    <thead><tr>
-      <th>Número</th>
-      <th>Apelido</th>
-      <th>Status</th>
-      <th>Operadora</th>
-      <th>Plataforma</th>
-      <th style="text-align:center">Restrições</th>
-      <th>Tipo</th>
-      <th>Histórico</th>
-      <th>Última restr.</th>
-      <th>Saúde</th>
-      <th>Timer restante</th>
-      <th>Obs.</th>
-      <th></th>
-    </tr></thead>
-    <tbody>${filtered.map(d=>waTRow(d)).join('')}</tbody>
-  </table>`;
-}
-
-/* ── tick a cada segundo ── */
-function waTick(){
-  waData.forEach(d=>{
-    if(d.status!=='rest'||!d.restEnd) return;
-    const rem = d.restEnd - Date.now();
-    ['t-','m-'].forEach(p=>{
-      const cd = document.getElementById(p+'cd-'+d.id);
-      const pb = document.getElementById(p+'pb-'+d.id);
-      if(!cd) return;
-      if(rem<=0){
-        cd.className='wt-done'; cd.textContent='✓ Liberado';
-        if(pb) pb.parentElement.style.display='none';
-      } else {
-        cd.textContent='⏱ '+waFmt(rem);
-        if(pb) pb.style.width=Math.round(Math.max(0,(rem/d._totalMs)*100))+'%';
-      }
-    });
-  });
-}
-setInterval(waTick,1000);
-
-/* ── modal ── */
-function waToggleRest(){
-  document.getElementById('wa-rest-row').style.display = document.getElementById('wf-status').value==='rest'?'block':'none';
-}
-
-function waOpenModal(id){
-  waEditId = id||null;
-  document.getElementById('wa-modal-title').textContent = id?'Editar número':'Novo número';
-  const now2 = new Date();
-  const ldt = new Date(now2-now2.getTimezoneOffset()*60000).toISOString().slice(0,16);
-  const todayStr = now2.toISOString().slice(0,10);
-  if(id){
-    const d = waData.find(x=>x.id===id); if(!d) return;
-    document.getElementById('wf-num').value       = d.num||'';
-    document.getElementById('wf-nick').value      = d.nick||'';
-    document.getElementById('wf-operadora').value = d.operadora||'';
-    document.getElementById('wf-plat').value      = d.plat||'uaizap';
-    document.getElementById('wf-status').value    = d.status||'ok';
-    document.getElementById('wf-rest-total').value= d.restTotal||0;
-    document.getElementById('wf-last-rest').value = d.lastRest||'';
-    document.getElementById('wf-obs').value       = d.obs||'';
-    if(d.status==='rest'&&d.restEnd&&d._totalMs){
-      document.getElementById('wf-dur').value = d._totalMs/3600000;
-      document.getElementById('wf-horario').value = new Date(d.restEnd-d._totalMs-now2.getTimezoneOffset()*60000).toISOString().slice(0,16);
-    } else { document.getElementById('wf-dur').value='6'; document.getElementById('wf-horario').value=ldt; }
-  } else {
-    ['wf-num','wf-nick','wf-obs'].forEach(i=>document.getElementById(i).value='');
-    document.getElementById('wf-operadora').value='';
-    document.getElementById('wf-status').value='ok';
-    document.getElementById('wf-plat').value='uaizap';
-    document.getElementById('wf-rest-total').value=0;
-    document.getElementById('wf-last-rest').value='';
-    document.getElementById('wf-dur').value='6';
-    document.getElementById('wf-horario').value=ldt;
-  }
-  waToggleRest();
-  document.getElementById('wa-overlay').classList.add('open');
-}
-
-function waCloseModal(){ document.getElementById('wa-overlay').classList.remove('open'); waEditId=null; }
-
-function waSave(){
-  const num = document.getElementById('wf-num').value.trim();
-  if(!num){ showToast('Informe o número!','error'); return; }
-  const st     = document.getElementById('wf-status').value;
-  const dur    = parseInt(document.getElementById('wf-dur').value)||6;
-  const hor    = document.getElementById('wf-horario').value;
-  const totalMs= dur*3600000;
-  const obj = {
-    id:        waEditId||waNextId++,
-    num,
-    nick:      document.getElementById('wf-nick').value.trim(),
-    operadora: document.getElementById('wf-operadora').value,
-    plat:      document.getElementById('wf-plat').value,
-    status:    st,
-    restTotal: parseInt(document.getElementById('wf-rest-total').value)||0,
-    lastRest:  document.getElementById('wf-last-rest').value||null,
-    restEnd:   st==='rest'&&hor ? new Date(hor).getTime()+totalMs : null,
-    _totalMs:  st==='rest' ? totalMs : null,
-    obs:       document.getElementById('wf-obs').value.trim()
-  };
-  if(waEditId) waData=waData.map(x=>x.id===waEditId?obj:x); else waData.push(obj);
-  waSaveLocal(); waCloseModal(); waRender();
-  showToast('Salvo!','success');
-}
-
-function waEdit(id){ waOpenModal(id); }
-function waDel(id){
-  confirmar('Remover este número?','Esta ação não pode ser desfeita.',()=>{
-    waData=waData.filter(x=>x.id!==id); waSaveLocal(); waRender(); showToast('Removido.','info');
-  });
-}
-document.getElementById('wa-overlay').addEventListener('click',function(e){ if(e.target===this) waCloseModal(); });
-</script>
-
 </div><!-- /app-content -->
 
 <!-- MODAIS -->
@@ -1584,11 +1069,7 @@ document.getElementById('wa-overlay').addEventListener('click',function(e){ if(e
     <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
     <div class="bnav-label">Gráficos</div>
   </button>
-  <button class="bnav-item" onclick="switchTab('numeros',this,4)" data-tab="numeros">
-    <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-    <div class="bnav-label">Números</div>
-  </button>
-  <button class="bnav-item" onclick="switchTab('config',this,5)" data-tab="config">
+  <button class="bnav-item" onclick="switchTab('config',this,4)" data-tab="config">
     <svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     <div class="bnav-label">Config</div>
   </button>
@@ -2082,8 +1563,6 @@ function atualizarSelects(){
   
   // Popular filtro de meses no Histórico
   popularFiltroMeses();
-  // Popular oferta no filtro do resumo
-  popularOfertasResumoFiltro();
 }
 
 function popularFiltroMeses(){
@@ -2664,10 +2143,10 @@ function switchTab(tab,el,idx){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   if(el){el.classList.add('active');}
   const bnavItems=document.querySelectorAll('.bnav-item');
-  const bnavMap={resumo:0,registro:1,historico:2,graficos:3,numeros:4,config:5};
+  const bnavMap={resumo:0,registro:1,historico:2,graficos:3,config:4};
   if(bnavMap[tab]!==undefined&&bnavItems[bnavMap[tab]])bnavItems[bnavMap[tab]].classList.add('active');
   const dtabs=document.querySelectorAll('.dtab');
-  const dtabMap={resumo:0,registro:1,periodo:2,historico:3,graficos:4,crescimento:5,config:6,numeros:7};
+  const dtabMap={resumo:0,registro:1,periodo:2,historico:3,graficos:4,crescimento:5,config:6};
   if(dtabMap[tab]!==undefined&&dtabs[dtabMap[tab]])dtabs[dtabMap[tab]].classList.add('active');
   const view=document.getElementById('tab-'+tab);
   if(view) view.classList.add('active');
@@ -2675,9 +2154,8 @@ function switchTab(tab,el,idx){
   if(tab==='periodo') { renderPeriodo(); }
   if(tab==='crescimento') setTimeout(renderCrescimento,50);
   if(tab==='historico') renderTabela();
-  if(tab==='resumo') { renderKPIs(); renderHoje(); atualizarHojeHero(); atualizarKPIHighlights(); aplicarFiltroResumo(); }
+  if(tab==='resumo') { renderKPIs(); renderHoje(); atualizarHojeHero(); atualizarKPIHighlights(); }
   if(tab==='perfil') carregarPerfil();
-  if(tab==='numeros') waRender();
   window.scrollTo(0,0);
 }
 
@@ -2809,72 +2287,62 @@ function atualizarHojeHero(){
   const regsHoje = dados.filter(d => d.data === hoje);
   const lucroHoje = regsHoje.reduce((s,d) => s + (d.lucro||0), 0);
   const heroValor = document.getElementById('hoje-hero-valor');
-  const heroSub   = document.getElementById('hoje-hero-sub');
-  const metaDash  = document.getElementById('hoje-meta-dash');
-  const metaDash2 = document.getElementById('hoje-meta-dash2');
-  const metaPct   = document.getElementById('hoje-meta-pct');
-
-  if(heroValor){
-    heroValor.textContent = fmtBRL(lucroHoje);
-    heroValor.className   = 'hoje-hero-valor ' + (lucroHoje>0?'pos':lucroHoje<0?'neg':'zero');
-  }
-  if(heroSub) heroSub.textContent = regsHoje.length>0
-    ? `${regsHoje.length} registro${regsHoje.length>1?'s':''} hoje`
-    : 'Nenhum registro hoje ainda';
-
-  const metaMensal = parseFloat(
-    (metas && (metas.mensal || metas.lucroMensal)) ||
-    document.getElementById('meta-mensal')?.value ||
-    JSON.parse(localStorage.getItem('x1_metas')||'{}').mensal ||
-    0
-  ) || 0;
-
-  if(metaMensal>0 && metaDash && metaPct){
+  const heroSub = document.getElementById('hoje-hero-sub');
+  const metaDash = document.getElementById('hoje-meta-dash');
+  const metaPct = document.getElementById('hoje-meta-pct');
+  if(!heroValor) return;
+  heroValor.textContent = fmtBRL(lucroHoje);
+  heroValor.className = 'hoje-hero-valor ' + (lucroHoje > 0 ? 'pos' : lucroHoje < 0 ? 'neg' : 'zero');
+  if(heroSub) heroSub.textContent = regsHoje.length > 0 ? `${regsHoje.length} registro${regsHoje.length>1?'s':''} hoje` : 'Nenhum registro hoje ainda';
+  // meta diária — buscar de todas as fontes possíveis
+  const metaMensal = (metas&&(metas.mensal||metas.lucroMensal)) ||
+    parseFloat(document.getElementById('meta-mensal')?.value||'0') || 0;
+  if(metaMensal > 0 && metaDash && metaPct){
     const diasMes = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
     const metaDia = metaMensal / diasMes;
-    const pct     = metaDia !== 0 ? lucroHoje / metaDia : 0;  // ex: 1.45 = 145%
-    const pctInt  = Math.round(pct * 100);
-    const circ    = 150.8;
-
-    // ── texto ──
-    metaPct.textContent = pctInt + '%';
-
-    // ── cores ──
-    let cor;
-    if(lucroHoje < 0)  cor = 'var(--red)';
-    else if(pct >= 2)  cor = 'var(--purple)';  // dobrou a meta
-    else if(pct >= 1)  cor = 'var(--green)';
-    else               cor = 'var(--yellow)';
-
-    metaDash.style.stroke = cor;
-    metaPct.style.color   = cor;
-
-    // ── anel principal ──
+    // Calcular porcentagem sem limite (pode passar de 100%)
+    const pct = metaDia !== 0 ? (lucroHoje / metaDia) : 0;
+    const pctFormatado = Math.round(pct * 100);
+    const circ = 150.8;
+    
+    // Cores: vermelho se negativo, amarelo se positivo mas abaixo da meta, verde se atingiu/excedeu
+    let corStroke = 'var(--border2)';
+    let corTexto = '';
+    
     if(lucroHoje < 0){
-      metaDash.style.strokeDashoffset = circ;          // vazio
+      // Negativo: vermelho
+      corStroke = 'var(--red)';
+      corTexto = 'neg';
     } else if(pct >= 1){
-      metaDash.style.strokeDashoffset = 0;             // completo
+      // Atingiu ou ultrapassou: verde
+      corStroke = 'var(--green)';
+      corTexto = 'pos';
     } else {
-      metaDash.style.strokeDashoffset = circ * (1 - pct);
+      // Abaixo da meta mas positivo: amarelo
+      corStroke = 'var(--yellow)';
     }
-
-    // ── anel secundário (excesso acima de 100%) ──
-    if(metaDash2){
-      if(pct > 1){
-        const excesso = pct % 1;                        // fração da volta extra
-        metaDash2.style.opacity           = '1';
-        metaDash2.style.stroke            = pct >= 2 ? 'var(--purple)' : 'var(--green)';
-        metaDash2.style.strokeDashoffset  = circ * (1 - excesso);
+    
+    metaDash.style.stroke = corStroke;
+    metaPct.style.color = corStroke === 'var(--red)' ? 'var(--red)' : (corStroke === 'var(--green)' ? 'var(--green)' : 'var(--yellow)');
+    
+    // Se negativo, mostrar valor negativo; se acima de 100%, mostrar valor real
+    if(lucroHoje < 0){
+      const pctNegativo = Math.round((lucroHoje / metaDia) * 100);
+      metaPct.textContent = pctNegativo + '%';
+      metaDash.style.strokeDashoffset = circ;
+    } else {
+      metaPct.textContent = pctFormatado + '%';
+      if(pct >= 1){
+        // Acima de 100%: mostra o excesso como nova volta
+        // ex: 145% → excesso=0.45 → anel em 45%
+        const excesso = pct % 1;
+        metaDash.style.strokeDashoffset = excesso === 0 ? 0 : circ * (1 - excesso);
       } else {
-        metaDash2.style.opacity = '0';
-        metaDash2.style.strokeDashoffset = circ;
+        metaDash.style.strokeDashoffset = circ * (1 - pct);
       }
     }
-
-  } else if(metaPct){
-    metaPct.textContent = metaMensal>0 ? '0%' : '—';
-    if(metaDash)  metaDash.style.strokeDashoffset  = 150.8;
-    if(metaDash2) metaDash2.style.opacity = '0';
+  } else if(metaPct) {
+    metaPct.textContent = metaMensal > 0 ? '0%' : '—';
   }
 }
 
@@ -2921,77 +2389,6 @@ function atualizarKPIHighlights(){
   set('r6-vendas', tV.toString());
   set('r6-ticket', aT !== null ? fmtBRL(aT) : '—');
 }
-
-/* ── FILTRO RESUMO ── */
-function aplicarFiltroResumo(){
-  const periodo = document.getElementById('resumo-periodo-sel').value;
-  const ofertaId = document.getElementById('resumo-oferta-sel').value;
-  const datasWrap = document.getElementById('resumo-datas-wrap');
-  const now = new Date();
-  const localD = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-
-  let de = null, ate = null;
-
-  if(periodo === 'personalizado'){
-    datasWrap.style.display = '';
-    de = document.getElementById('resumo-de').value;
-    ate = document.getElementById('resumo-ate').value;
-    if(!de || !ate) return;
-  } else {
-    datasWrap.style.display = 'none';
-    if(periodo === 'hoje'){
-      de = ate = localD(now);
-    } else if(periodo === 'ontem'){
-      const d = new Date(now); d.setDate(d.getDate()-1);
-      de = ate = localD(d);
-    } else if(periodo === '7dias'){
-      const d = new Date(now); d.setDate(d.getDate()-6);
-      de = localD(d); ate = localD(now);
-    } else if(periodo === 'mes_atual'){
-      de = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
-      ate = localD(now);
-    } else if(periodo === 'mes_passado'){
-      const p = new Date(now.getFullYear(), now.getMonth()-1, 1);
-      const fim = new Date(now.getFullYear(), now.getMonth(), 0);
-      de = localD(p); ate = localD(fim);
-    } else if(periodo === 'maximo'){
-      de = null; ate = null;
-    }
-  }
-
-  let lista = dados;
-  if(de) lista = lista.filter(d => d.data >= de);
-  if(ate) lista = lista.filter(d => d.data <= ate);
-  if(ofertaId) lista = lista.filter(d => String(d.ofertaId) === ofertaId);
-
-  const tL = lista.reduce((s,d)=>s+(d.lucro||0),0);
-  const tR = lista.reduce((s,d)=>s+(d.receita||0),0);
-  const tG = lista.reduce((s,d)=>s+(d.gastosBRL||0),0);
-  const tV = lista.reduce((s,d)=>s+(d.vendas||0),0);
-  const aROI = tG > 0 ? tR/tG : null;
-  const aT = tV > 0 ? tR/tV : null;
-
-  const set = (id, val, cls) => {
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.textContent = val;
-    el.className = 'kpi-value' + (cls ? ' '+cls : '');
-  };
-
-  set('r6-lucro', fmtBRL(tL), tL>=0?'pos':'neg');
-  set('r6-receita', fmtBRL(tR));
-  set('r6-roi', aROI !== null ? aROI.toFixed(2) : '—', aROI>=1?'pos':aROI!==null?'neg':'');
-  set('r6-gastos', fmtBRL(tG));
-  set('r6-vendas', tV.toString());
-  set('r6-ticket', aT !== null ? fmtBRL(aT) : '—');
-}
-
-function popularOfertasResumoFiltro(){
-  const sel = document.getElementById('resumo-oferta-sel');
-  if(!sel) return;
-  sel.innerHTML = '<option value="">Qualquer</option>' + ofertas.map(o=>`<option value="${o.id}">${o.nome}</option>`).join('');
-}
-
 
 /* ── EXPORT CSV ── */
 function exportarCSV(){
@@ -3119,7 +2516,7 @@ function verificarMeta(){
 
 /* ── SWIPE PARA TROCAR ABA ── */
 function iniciarSwipe(){
-  const tabOrder = ['resumo','registro','historico','graficos','numeros','config'];
+  const tabOrder = ['resumo','registro','historico','graficos','config'];
   let startX=0, startY=0, startTime=0;
   const container = document.getElementById('app-container');
   if(!container) return;
