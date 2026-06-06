@@ -2122,7 +2122,6 @@ function renderAll(){
   renderOfertas();renderDespesas();renderTags();
   renderTagsForm('f-tags-wrap',[]);
   atualizarHojeHero();atualizarKPIHighlights();atualizarHeaderRevenue();
-  aplicarFiltroResumo();
 }
 
 function atualizarHeaderRevenue(){
@@ -2327,16 +2326,15 @@ function atualizarHojeHero(){
     
     // Se negativo, mostrar valor negativo; se acima de 100%, mostrar valor real
     if(lucroHoje < 0){
+      // Para negativo, usar valor proporcional negativo (ex: -20% se meta é 100 e lucro é -20)
       const pctNegativo = Math.round((lucroHoje / metaDia) * 100);
       metaPct.textContent = pctNegativo + '%';
-      metaDash.style.strokeDashoffset = circ;
+      metaDash.style.strokeDashoffset = circ; // círculo vazio
     } else {
       metaPct.textContent = pctFormatado + '%';
+      // Se passou de 100%, círculo completo (offset 0)
       if(pct >= 1){
-        // Acima de 100%: mostra o excesso como nova volta
-        // ex: 145% → excesso=0.45 → anel em 45%
-        const excesso = pct % 1;
-        metaDash.style.strokeDashoffset = excesso === 0 ? 0 : circ * (1 - excesso);
+        metaDash.style.strokeDashoffset = 0;
       } else {
         metaDash.style.strokeDashoffset = circ * (1 - pct);
       }
