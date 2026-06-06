@@ -725,7 +725,11 @@ body.light .mini-sel{color-scheme:light;}
         <svg width="58" height="58" viewBox="0 0 58 58">
           <circle cx="29" cy="29" r="24" fill="none" stroke="var(--border2)" stroke-width="5"/>
           <circle cx="29" cy="29" r="24" fill="none" stroke="var(--green)" stroke-width="5"
-            stroke-dasharray="150.8" id="hoje-meta-dash" stroke-dashoffset="150.8" stroke-linecap="round"/>
+            stroke-dasharray="150.8" id="hoje-meta-dash" stroke-dashoffset="150.8" stroke-linecap="round"
+            style="transition:stroke-dashoffset .6s ease,stroke .3s ease"/>
+          <circle cx="29" cy="29" r="24" fill="none" stroke="var(--green)" stroke-width="3"
+            stroke-dasharray="150.8" id="hoje-meta-dash2" stroke-dashoffset="150.8" stroke-linecap="round"
+            opacity="0" style="transition:stroke-dashoffset .6s ease,stroke .3s ease,opacity .3s ease"/>
         </svg>
         <div class="hoje-meta-pct" id="hoje-meta-pct">0%</div>
       </div>
@@ -2801,61 +2805,66 @@ function atualizarHojeHero(){
   const regsHoje = dados.filter(d => d.data === hoje);
   const lucroHoje = regsHoje.reduce((s,d) => s + (d.lucro||0), 0);
   const heroValor = document.getElementById('hoje-hero-valor');
-  const heroSub = document.getElementById('hoje-hero-sub');
-  const metaDash = document.getElementById('hoje-meta-dash');
-  const metaPct = document.getElementById('hoje-meta-pct');
+  const heroSub   = document.getElementById('hoje-hero-sub');
+  const metaDash  = document.getElementById('hoje-meta-dash');
+  const metaDash2 = document.getElementById('hoje-meta-dash2');
+  const metaPct   = document.getElementById('hoje-meta-pct');
   if(!heroValor) return;
-  heroValor.textContent = fmtBRL(lucroHoje);
-  heroValor.className = 'hoje-hero-valor ' + (lucroHoje > 0 ? 'pos' : lucroHoje < 0 ? 'neg' : 'zero');
-  if(heroSub) heroSub.textContent = regsHoje.length > 0 ? `${regsHoje.length} registro${regsHoje.length>1?'s':''} hoje` : 'Nenhum registro hoje ainda';
-  // meta diária — buscar de todas as fontes possíveis
+
+  heroValor.textContent  = fmtBRL(lucroHoje);
+  heroValor.className    = 'hoje-hero-valor ' + (lucroHoje>0?'pos':lucroHoje<0?'neg':'zero');
+  if(heroSub) heroSub.textContent = regsHoje.length>0
+    ? `${regsHoje.length} registro${regsHoje.length>1?'s':''} hoje`
+    : 'Nenhum registro hoje ainda';
+
   const metaMensal = (metas&&(metas.mensal||metas.lucroMensal)) ||
     parseFloat(document.getElementById('meta-mensal')?.value||'0') || 0;
+
   if(metaMensal > 0 && metaDash && metaPct){
     const diasMes = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
     const metaDia = metaMensal / diasMes;
-    // Calcular porcentagem sem limite (pode passar de 100%)
-    const pct = metaDia !== 0 ? (lucroHoje / metaDia) : 0;
-    const pctFormatado = Math.round(pct * 100);
-    const circ = 150.8;
-    
-    // Cores: vermelho se negativo, amarelo se positivo mas abaixo da meta, verde se atingiu/excedeu
-    let corStroke = 'var(--border2)';
-    let corTexto = '';
-    
+    const pct     = metaDia !== 0 ? lucroHoje / metaDia : 0;   // ex: 1.45 = 145%
+    const pctInt  = Math.round(pct * 100);                      // ex: 145
+    const circ    = 150.8;                                      // circunferência do círculo (2πr)
+
+    // ── cores ──
+    let cor;
+    if(lucroHoje < 0)    cor = 'var(--red)';
+    else if(pct >= 2)    cor = '#a855f7';   // roxo — dobrou a meta
+    else if(pct >= 1)    cor = 'var(--green)';
+    else                 cor = 'var(--yellow)';
+
+    if(metaDash)  metaDash.style.stroke  = cor;
+    if(metaDash2) metaDash2.style.stroke = 'var(--green)';
+    if(metaPct){  metaPct.textContent = pctInt + '%'; metaPct.style.color = cor; }
+
     if(lucroHoje < 0){
-      // Negativo: vermelho
-      corStroke = 'var(--red)';
-      corTexto = 'neg';
-    } else if(pct >= 1){
-      // Atingiu ou ultrapassou: verde
-      corStroke = 'var(--green)';
-      corTexto = 'pos';
+      // negativo: anel vazio + texto vermelho
+      if(metaDash)  metaDash.style.strokeDashoffset  = circ;
+      if(metaDash2) metaDash2.style.strokeDashoffset = circ;
+      if(metaDash2) metaDash2.style.opacity = '0';
+
+    } else if(pct <= 1){
+      // 0–100 %: volta única, sem anel secundário
+      if(metaDash)  metaDash.style.strokeDashoffset  = circ * (1 - pct);
+      if(metaDash2) metaDash2.style.strokeDashoffset = circ;
+      if(metaDash2) metaDash2.style.opacity = '0';
+
     } else {
-      // Abaixo da meta mas positivo: amarelo
-      corStroke = 'var(--yellow)';
-    }
-    
-    metaDash.style.stroke = corStroke;
-    metaPct.style.color = corStroke === 'var(--red)' ? 'var(--red)' : (corStroke === 'var(--green)' ? 'var(--green)' : 'var(--yellow)');
-    
-    // Se negativo, mostrar valor negativo; se acima de 100%, mostrar valor real
-    if(lucroHoje < 0){
-      // Para negativo, usar valor proporcional negativo (ex: -20% se meta é 100 e lucro é -20)
-      const pctNegativo = Math.round((lucroHoje / metaDia) * 100);
-      metaPct.textContent = pctNegativo + '%';
-      metaDash.style.strokeDashoffset = circ; // círculo vazio
-    } else {
-      metaPct.textContent = pctFormatado + '%';
-      // Se passou de 100%, círculo completo (offset 0)
-      if(pct >= 1){
-        metaDash.style.strokeDashoffset = 0;
-      } else {
-        metaDash.style.strokeDashoffset = circ * (1 - pct);
+      // acima de 100 %: anel primário completo + anel secundário mostrando o excesso
+      const excesso = pct - Math.floor(pct);  // parte fracionária da volta atual
+      if(metaDash)  metaDash.style.strokeDashoffset  = 0;                      // volta completa
+      if(metaDash2){
+        metaDash2.style.opacity            = '1';
+        metaDash2.style.strokeDashoffset   = circ * (1 - excesso);             // volta parcial do excesso
+        // cor do anel extra: verde até 200%, roxo acima de 200%
+        metaDash2.style.stroke = pct >= 2 ? '#a855f7' : 'var(--green)';
       }
     }
-  } else if(metaPct) {
+  } else if(metaPct){
     metaPct.textContent = metaMensal > 0 ? '0%' : '—';
+    if(metaDash)  metaDash.style.strokeDashoffset  = 150.8;
+    if(metaDash2) metaDash2.style.opacity = '0';
   }
 }
 
