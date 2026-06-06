@@ -1310,10 +1310,10 @@ function lerCampos(p='f-'){
     lucro:g('lucro'),margem:g('margem'),roi:parseFloat(document.getElementById(p+'roi')?.value)||0,
     ticket:g('ticket'),nota:gs('nota'),tags:getTagsSel(tw)};
 }
-function salvarRegistro(){
-  const d=lerCampos('f-');if(!d.data){showToast('Informe a data!');return;}
+function salvarRegistro(reg){
+  const d=reg||lerCampos('f-');if(!d.data){showToast('Informe a data!');return;}
   dados.push({id:Date.now(),...d});dados.sort((a,b)=>a.data.localeCompare(b.data));
-  save();renderAll();showToast('Registro salvo!');limparForm();
+  save();renderAll();showToast('Registro salvo!');if(!reg)limparForm();
 }
 function limparForm(){
   ['f-dolar','f-gastos-usd','f-gastos-brl','f-iof-brl','f-cashback','f-cashback-brl','f-receita','f-adicional','f-vendas','f-lucro','f-margem','f-roi','f-ticket','f-nota'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='';}});
@@ -1451,6 +1451,7 @@ function fazerLogin(e) {
     document.getElementById('app-container').classList.add('visible');
     document.getElementById('login-usuario').value = '';
     document.getElementById('login-senha').value = '';
+    initApp();
   } else {
     msg.textContent = 'Email ou senha incorretos';
   }
@@ -1469,6 +1470,7 @@ function fazerLogout() {
 function entrarSemSenha() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-container').classList.add('visible');
+  initApp();
 }
 
 function fazerLogout() {
@@ -2117,11 +2119,12 @@ function renderGraficos(){
   verificarMeta();
 }
 
+function runSafe(fn){try{fn()}catch(e){console.warn('render:',e)}}
 function renderAll(){
-  renderKPIs();renderHoje();renderWeek();renderTabela();renderPeriodo();
-  renderOfertas();renderDespesas();renderTags();
-  renderTagsForm('f-tags-wrap',[]);
-  atualizarHojeHero();atualizarKPIHighlights();atualizarHeaderRevenue();
+  runSafe(renderKPIs);runSafe(renderHoje);runSafe(renderWeek);runSafe(renderTabela);runSafe(renderPeriodo);
+  runSafe(renderOfertas);runSafe(renderDespesas);runSafe(renderTags);
+  runSafe(()=>renderTagsForm('f-tags-wrap',[]));
+  runSafe(atualizarHojeHero);runSafe(atualizarKPIHighlights);runSafe(atualizarHeaderRevenue);
 }
 
 function atualizarHeaderRevenue(){
