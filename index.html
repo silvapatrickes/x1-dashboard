@@ -2643,6 +2643,7 @@ function renderAll(){
   renderOfertas();renderDespesas();renderTags();
   renderTagsForm('f-tags-wrap',[]);
   atualizarHojeHero();atualizarKPIHighlights();atualizarHeaderRevenue();
+  aplicarFiltroResumo();
 }
 
 function atualizarHeaderRevenue(){
@@ -2674,7 +2675,7 @@ function switchTab(tab,el,idx){
   if(tab==='periodo') { renderPeriodo(); }
   if(tab==='crescimento') setTimeout(renderCrescimento,50);
   if(tab==='historico') renderTabela();
-  if(tab==='resumo') { renderKPIs(); renderHoje(); atualizarHojeHero(); atualizarKPIHighlights(); }
+  if(tab==='resumo') { renderKPIs(); renderHoje(); atualizarHojeHero(); atualizarKPIHighlights(); aplicarFiltroResumo(); }
   if(tab==='perfil') carregarPerfil();
   if(tab==='numeros') waRender();
   window.scrollTo(0,0);
@@ -2812,16 +2813,21 @@ function atualizarHojeHero(){
   const metaDash  = document.getElementById('hoje-meta-dash');
   const metaDash2 = document.getElementById('hoje-meta-dash2');
   const metaPct   = document.getElementById('hoje-meta-pct');
-  if(!heroValor) return;
 
-  heroValor.textContent = fmtBRL(lucroHoje);
-  heroValor.className   = 'hoje-hero-valor ' + (lucroHoje>0?'pos':lucroHoje<0?'neg':'zero');
+  if(heroValor){
+    heroValor.textContent = fmtBRL(lucroHoje);
+    heroValor.className   = 'hoje-hero-valor ' + (lucroHoje>0?'pos':lucroHoje<0?'neg':'zero');
+  }
   if(heroSub) heroSub.textContent = regsHoje.length>0
     ? `${regsHoje.length} registro${regsHoje.length>1?'s':''} hoje`
     : 'Nenhum registro hoje ainda';
 
-  const metaMensal = (metas&&(metas.mensal||metas.lucroMensal)) ||
-    parseFloat(document.getElementById('meta-mensal')?.value||'0') || 0;
+  const metaMensal = parseFloat(
+    (metas && (metas.mensal || metas.lucroMensal)) ||
+    document.getElementById('meta-mensal')?.value ||
+    JSON.parse(localStorage.getItem('x1_metas')||'{}').mensal ||
+    0
+  ) || 0;
 
   if(metaMensal>0 && metaDash && metaPct){
     const diasMes = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
